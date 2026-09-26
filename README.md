@@ -31,7 +31,7 @@ git clone https://github.com/Surya-Bhamidi/TA-and-BDA.git
 cd TA-and-BDA
 ```
 
-The private repository requires an authorized GitHub account. Source, tests, documentation, screenshots and measured results are tracked. Large datasets, weights, search indexes, virtual environments and downloaded runtimes are excluded. A fresh clone must run the pipeline.
+Source, tests, documentation, screenshots and measured results are tracked. Large datasets, weights, search indexes, virtual environments and downloaded runtimes are excluded. A fresh clone must run the pipeline.
 
 Use **Python 3.12 and Java 17**. Allow several GB of disk and at least 8 GB RAM. From PowerShell:
 
