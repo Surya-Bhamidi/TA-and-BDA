@@ -1,0 +1,21 @@
+{
+  "engine": "Apache Spark",
+  "spark_version": "3.5.5",
+  "master": "local[2]",
+  "input_partitions": 8,
+  "shuffle_partitions": 8,
+  "raw_rows": 62700,
+  "invalid_rows_removed": 1200,
+  "duplicates_removed": 1500,
+  "clean_rows": 60000,
+  "storage": "Spark-written Parquet partitioned by split",
+  "runtime_seconds": 28.79,
+  "mllib": {
+    "model": "HashingTF + IDF + multinomial logistic regression",
+    "train_rows": 45008,
+    "test_rows": 7496,
+    "accuracy": 0.8772678762006404,
+    "weighted_f1": 0.839553202136457
+  },
+  "deployment_note": "local[2] executes Spark tasks on two local cores; this run is not a multi-machine cluster."
+}

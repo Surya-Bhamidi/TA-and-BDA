@@ -19,3 +19,11 @@ artifacts/*.pid
 artifacts/browser_check.json
 artifacts/run_*.json
 artifacts/delivery_manifest.json
+artifacts/semantic_embeddings.npy
+artifacts/stage_state/
+artifacts/runs/
+artifacts/version2_ready.json
+data/external/
+.ruff_cache/
+.coverage
+htmlcov/

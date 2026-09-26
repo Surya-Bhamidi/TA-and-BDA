@@ -20,7 +20,7 @@ def test_generated_offsets_and_bio_roundtrip_cover_all_templates():
         for ent in entities:
             assert row["narrative"][ent["start"]:ent["end"]] == ent["text"]
         groups.setdefault(row["template_group"], set()).add(row["split"])
-    assert len(groups) == 64
+    assert len(groups) == 384
     assert all(len(splits) == 1 for splits in groups.values())
 
 

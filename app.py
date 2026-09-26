@@ -1,6 +1,8 @@
 """Streamlit research dashboard. Start with: python -m streamlit run app.py"""
 import html
 import json
+import os
+import hmac
 from datetime import timedelta
 import joblib
 import numpy as np
@@ -11,14 +13,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 from scipy import sparse
 
-from crime_nlp.config import ROOT, PROCESSED, ARTIFACTS, MODELS
-from crime_nlp.text import evidence_answer
+from crime_nlp.config import ROOT, PROCESSED, ARTIFACTS, MODELS, CATEGORIES, ENTITY_LABELS
+from crime_nlp.store import fetch_reports, entity_matches
 
 st.set_page_config(page_title="Narrative Intelligence | Crime NLP", page_icon="◈", layout="wide", initial_sidebar_state="expanded")
 PALETTE = ["#087F75", "#3E6DA8", "#DA9C42", "#9167AD", "#DC7B65", "#60AEB0", "#768BC1", "#9DAD71"]
 px.defaults.color_discrete_sequence = PALETTE
 st.markdown("""<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 html,body,[class*="css"],.stApp {font-family:'DM Sans',sans-serif}
 h1,h2,h3 {font-family:'Manrope',sans-serif;letter-spacing:-.035em}
 .block-container {padding-top:2rem;padding-bottom:3rem;max-width:1540px}
@@ -42,12 +43,23 @@ div.stButton>button[kind="primary"] {border-radius:8px;font-weight:600}
 .topic-card {background:white;border:1px solid #e1e8ef;border-radius:12px;padding:20px;min-height:160px;margin-bottom:15px}
 .topic-card h3 {font-size:18px;margin:0 0 12px}.topic-card p {color:#627486;font-size:14px;line-height:1.8}
 .section-label {font-size:11px;letter-spacing:.12em;font-weight:700;color:#6b7a89;text-transform:uppercase}
+@media(max-width:760px){.block-container{padding:1rem}.hero{padding:18px}.hero h2{font-size:22px}}
 </style>""", unsafe_allow_html=True)
+
+password = os.environ.get("CRIME_DASHBOARD_PASSWORD")
+if password and not st.session_state.get("authenticated", False):
+    entered = st.text_input("Workspace password", type="password")
+    if st.button("Sign in"):
+        st.session_state.authenticated = hmac.compare_digest(entered, password)
+        if st.session_state.authenticated:
+            st.rerun()
+        st.error("Password not recognized.")
+    st.stop()
 
 
 @st.cache_data
 def load_data(stamp):
-    df = pd.read_parquet(PROCESSED / "dashboard.parquet")
+    df = pd.read_parquet(PROCESSED / "dashboard.parquet", columns=["report_id", "crime_type", "district", "event_time", "month", "sentiment", "topic_id", "topic_probability", "reported_at", "split", "predicted_crime", "threat_level", "confidence", "review_required"])
     df["event_time"] = pd.to_datetime(df.event_time)
     return df
 
@@ -58,9 +70,9 @@ def search_resources(stamp):
 
 
 @st.cache_data(max_entries=64, show_spinner=False)
-def cached_analysis(text, use_bert=False):
+def cached_analysis(text, use_bert=False, ner_choice="Automatic"):
     from crime_nlp.inference import analyze
-    return analyze(text, use_bert=use_bert)
+    return analyze(text, use_bert=use_bert, ner_choice=ner_choice)
 
 
 def read_artifact(name):
@@ -83,16 +95,16 @@ def chart(fig, height=350):
 
 st.sidebar.markdown('<div class="brand">◈ Narrative<br>Intelligence</div><div class="brand-sub">CRIME ANALYTICS LAB</div>', unsafe_allow_html=True)
 st.sidebar.markdown("University research project")
-page = st.sidebar.radio("Workspace", ["Overview", "Case explorer", "Narrative lab", "Model evaluation", "Topics", "Pipeline & syllabus"], label_visibility="collapsed")
+page = st.sidebar.radio("Workspace", ["Overview", "Case explorer", "Narrative lab", "Model evaluation", "Topics", "Pipeline & syllabus", "Learning guide"], label_visibility="collapsed")
 st.sidebar.divider()
 st.sidebar.caption("DATA PROVENANCE")
 st.sidebar.markdown("**Synthetic reports**\n\nFictional people, places and events. For NLP research and demonstration.")
 st.sidebar.caption("Spark · BERT · CRF · spaCy")
 
 dashboard_path = PROCESSED / "dashboard.parquet"
-if not dashboard_path.exists():
+if not dashboard_path.exists() or not (ARTIFACTS / "version2_ready.json").exists():
     heading("Project setup", "Your research workspace", "Decoding Crime Narratives using NLP and Big Data Analytics")
-    st.info("Generate the dataset and run the models to populate this dashboard.")
+    st.info("Version 2 is ready after its data, model and search-index stages finish. Run the commands below to build it.")
     st.code("python scripts/download_resources.py\npython run_pipeline.py\npython -m streamlit run app.py", language="bash")
     st.stop()
 
@@ -127,18 +139,25 @@ def show_analysis(result, key):
     top[1].metric("VADER polarity", f"{result['sentiment']['compound']:+.2f}")
     top[2].metric("Threat-language cues", result["threat"]["level"])
     top[3].metric("Extracted entities", len(result["entities"]))
+    st.caption(f"Calibrated category score: {result['model_score']:.1%}. Entity model: {result['ner_model']}. Scores are model estimates, not proof.")
+    if result["review_required"]:
+        st.warning("Low classification confidence: review the narrative before accepting its suggested category.")
     if "bert_prediction" in result:
         st.info(f"BERT sequence classification: {result['bert_prediction']}")
     tabs = st.tabs(["Entities & summary", "Syntax & morphology", "Evidence search", "Analysis details"])
     with tabs[0]:
         st.markdown("#### Annotated narrative")
-        st.caption("Predicted by the trained CRF: SUSPECT · VICTIM · LOCATION · WEAPON. Allegations in text are not verified facts.")
+        st.caption("Colored mentions include participants, places, weapons, property, dates, times and evidence. Role labels may describe allegations.")
         st.markdown(highlight_entities(result["text"], result["entities"]), unsafe_allow_html=True)
         st.markdown("#### Case summary")
         st.write(result["summary"])
         st.caption("Extractive TextRank: source sentences ranked by similarity, with a small lead-sentence prior.")
         if result["entities"]:
-            st.dataframe(pd.DataFrame(result["entities"])[["text", "label", "start", "end"]], hide_index=True, width="stretch")
+            st.dataframe(pd.DataFrame(result["entities"])[["text", "label", "assertion", "confidence", "start", "end"]], hide_index=True, width="stretch")
+        with st.expander("Structured case notes and source sentences"):
+            st.json(result["structured_summary"])
+        st.download_button("Download redacted narrative", result["redacted_text"], "redacted_narrative.txt", "text/plain", key=key + "_redacted")
+        st.caption("Redaction masks detected people and contact details. It can miss information; review before sharing.")
     with tabs[1]:
         st.markdown("#### How the narrative is structured")
         doc = language_model()(result["text"])
@@ -151,15 +170,26 @@ def show_analysis(result, key):
     with tabs[2]:
         question = st.text_input("Find supporting evidence in this case", placeholder="e.g. weapon, witness statement, camera footage", key=key + "_question")
         if question:
-            answer = evidence_answer(question, result["text"])
+            from crime_nlp.semantic import semantic_evidence
+            answer = semantic_evidence(question, result["text"], result.get("report_id", "custom narrative"))
             st.write(answer["answer"])
-            st.caption(f"Lexical similarity: {answer['score']:.3f}. Retrieves source text; it does not generate a factual answer.")
+            st.caption(f"Semantic similarity: {answer['score']:.3f}. The answer contains source sentences; it is not a probability of correctness.")
+            for citation in answer["citations"]:
+                st.caption(f"Source: {citation['report_id']}, sentence {citation['sentence']}")
     with tabs[3]:
         st.write("**Threat-language heuristic:**", ", ".join(result["threat"]["cues"]) or "No unnegated cues found")
         st.caption("This cue score is a demonstration heuristic. VADER sentiment measures polarity separately; neither score estimates real-world danger.")
         st.write("**Generic spaCy entities:**")
         st.dataframe(pd.DataFrame(result["generic_entities"], columns=["text", "label"]), hide_index=True, width="stretch")
         st.download_button("Download analysis JSON", json.dumps(result, indent=2, ensure_ascii=False), file_name="narrative_analysis.json", mime="application/json", key=key + "_download")
+        st.markdown("**Words influencing the category prediction**")
+        st.dataframe(pd.DataFrame(result["explanation"]), hide_index=True, width="stretch")
+        st.caption("Contributions to the TF-IDF classifier's class score; they are correlations learned from training data.")
+        correction = st.selectbox("Suggest a corrected category", CATEGORIES, key=key + "_correction")
+        if st.button("Save correction locally", key=key + "_feedback"):
+            from crime_nlp.store import save_feedback
+            save_feedback(result["text"], result["crime_type"], correction)
+            st.success("Saved the correction and a text hash locally. This does not retrain the model or save the narrative.")
 
 
 if page == "Overview":
@@ -197,23 +227,36 @@ if page == "Overview":
 elif page == "Case explorer":
     heading("Research workspace / case explorer", "Explore the case library", "Search, filter and inspect the evidence in individual narratives.")
     query = st.text_input("Search narratives", placeholder="Try: unauthorized account access, stolen phone, fire, or a report ID")
+    mode = st.radio("Search method", ["Keyword", "Semantic", "Hybrid"], horizontal=True)
     selected = filters(data, "explorer")
+    label = st.selectbox("Entity type", ["Any", *ENTITY_LABELS])
+    entity_value = st.text_input("Entity contains", placeholder="Optional: a person, location or item")
+    matches = entity_matches(label, entity_value)
+    if matches is not None:
+        selected = selected.loc[selected.index.intersection(matches)]
     limit = st.slider("Results to display", 5, 100, 20, step=5)
     if query.strip():
         vectorizer, matrix = search_resources(stamp)
         scores = np.asarray((matrix @ vectorizer.transform([query]).T).toarray()).ravel()
+        if mode != "Keyword":
+            from crime_nlp.semantic import semantic_scores, rank_scores
+            scores = rank_scores(scores, semantic_scores(query), mode)
         subset = selected.copy()
         subset["relevance"] = scores[subset.index]
         id_matches = subset.report_id.str.contains(query.strip(), case=False, regex=False)
         subset.loc[id_matches, "relevance"] = 1.
-        selected = subset[subset.relevance > .02].sort_values(["relevance", "report_id"], ascending=[False, True])
+        threshold = .02 if mode == "Keyword" else (.25 if mode == "Semantic" else 0)
+        selected = subset[subset.relevance > threshold].sort_values(["relevance", "report_id"], ascending=[False, True])
     else:
         selected = selected.sort_values("event_time", ascending=False)
-    st.caption(f"{len(selected):,} matching reports · TF-IDF ranked search · all records are synthetic")
+    st.caption(f"{len(selected):,} matching reports · {mode} search · all records are synthetic")
     if selected.empty:
         st.info("No matching reports. Try different words or broaden the filters.")
         st.stop()
-    display = selected.head(limit)
+    import hashlib
+    page_key = hashlib.sha256((query + mode + str(selected.index.tolist()) + str(limit)).encode()).hexdigest()[:12]
+    page_number = st.number_input("Page", min_value=1, max_value=max(1, (len(selected) + limit - 1) // limit), value=1, key="page_" + page_key)
+    display = selected.iloc[(page_number - 1) * limit:page_number * limit]
     st.dataframe(display[["report_id", "crime_type", "district", "reported_at", "predicted_crime", "threat_level"]].rename(columns={"crime_type": "Source label", "predicted_crime": "TF-IDF prediction", "threat_level": "Language cues"}), hide_index=True, width="stretch")
     choice = st.selectbox("Open a report", display.report_id.tolist(), format_func=lambda report_id: f"{report_id} · {display.loc[display.report_id == report_id, 'crime_type'].iloc[0]}")
     row = display.loc[display.report_id == choice].iloc[0]
@@ -221,15 +264,16 @@ elif page == "Case explorer":
     st.markdown(f"#### {choice}")
     st.caption(f"{row.district} · {row.reported_at} · {row.split} split")
     with st.spinner("Analyzing the narrative..."):
-        result = cached_analysis(row.narrative)
+        result = dict(cached_analysis(fetch_reports([row.name]).iloc[0].narrative))
+        result["report_id"] = choice
     show_analysis(result, "case")
-    st.download_button("Export search results CSV", display[["report_id", "narrative", "crime_type", "district", "predicted_crime"]].to_csv(index=False), "search_results.csv", "text/csv")
+    st.download_button("Export this page CSV", fetch_reports(display.index.tolist())[["report_id", "narrative", "crime_type", "district", "predicted_crime"]].to_csv(index=False), "search_results.csv", "text/csv")
 
 elif page == "Narrative lab":
     heading("Research workspace / narrative lab", "Read between the lines", "Analyze your own text with the trained NLP pipeline.")
     st.caption("Models are trained on fictional English narratives. Results on other writing styles may be unreliable. Uploaded text is analyzed in memory and is not saved by the app.")
     upload = st.file_uploader("Optional: open a text case file", type=["txt"])
-    default = data.iloc[0].narrative
+    default = fetch_reports([data.index[0]]).iloc[0].narrative
     if upload:
         if upload.size > 120000:
             st.error("Use a UTF-8 text file smaller than 120 KB.")
@@ -239,8 +283,12 @@ elif page == "Narrative lab":
         except UnicodeDecodeError:
             st.error("The uploaded text must use UTF-8 encoding.")
             st.stop()
+    if len(default) > 30000 or "\x00" in default:
+        st.error("Use plain text with at most 30,000 characters and no null bytes.")
+        st.stop()
     text = st.text_area("Case narrative", value=default, height=220, max_chars=30000, key="lab_text_" + (upload.name if upload else "sample"))
     use_bert = st.checkbox("Include BERT sequence classification", value=True)
+    ner_choice = st.selectbox("Entity extraction model", ["Automatic", "CRF", "BERT"])
     if st.button("Analyze narrative", type="primary"):
         if not text.strip():
             st.warning("Enter a narrative first.")
@@ -248,7 +296,7 @@ elif page == "Narrative lab":
             with st.spinner("Extracting entities, syntax, topics and context..."):
                 # Avoid caching user submissions across browser sessions.
                 from crime_nlp.inference import analyze
-                st.session_state["lab_result"] = analyze(text, use_bert)
+                st.session_state["lab_result"] = analyze(text, use_bert, ner_choice)
     if "lab_result" in st.session_state:
         show_analysis(st.session_state["lab_result"], "lab")
 
@@ -259,11 +307,18 @@ elif page == "Model evaluation":
     a.metric("TRAIN NARRATIVES", f"{protocol['train_rows']:,}")
     b.metric("VALIDATION NARRATIVES", f"{protocol['validation_rows']:,}")
     c.metric("TEST NARRATIVES", f"{protocol['test_rows']:,}")
-    d.metric("CRF ENTITY F1", f"{ner_evaluation['strict_entity_f1']:.1%}")
+    d.metric(f"{ner_evaluation['model']} ENTITY F1", f"{ner_evaluation['strict_entity_f1']:.1%}")
     st.info("Templates are disjoint across train, validation and test. Vectorizers and Word2Vec are fit only on training text. BERT checkpoints are selected by validation macro-F1. These are synthetic benchmark scores.")
     scores = pd.DataFrame([{"Model": name, "Accuracy": item["accuracy"], "Macro F1": item["macro_f1"], "Weighted F1": item["weighted_f1"]} for name, item in evaluation["models"].items()])
     chart(px.bar(scores.melt(id_vars="Model", var_name="Metric", value_name="Score"), x="Model", y="Score", color="Metric", barmode="group", range_y=[0, 1.05]), 340)
     st.dataframe(scores.style.format({"Accuracy": "{:.3f}", "Macro F1": "{:.3f}", "Weighted F1": "{:.3f}"}), hide_index=True, width="stretch")
+    with st.expander("Accuracy intervals and confidence calibration"):
+        st.dataframe(pd.DataFrame([{"Model": name, "95% lower": item["accuracy_ci95"][0], "95% upper": item["accuracy_ci95"][1]} for name, item in evaluation["models"].items()]), hide_index=True)
+        bins = pd.DataFrame([{**item, "Calibration": name} for name in ("before", "after") for item in evaluation["calibration_test"][name]["bins"]])
+        figure = px.line(bins, x="mean_confidence", y="accuracy", color="Calibration", markers=True, range_x=[0, 1], range_y=[0, 1])
+        figure.add_shape(type="line", x0=0, y0=0, x1=1, y1=1, line=dict(dash="dash", color="gray"))
+        chart(figure, 300)
+        st.caption("The dashed line is perfect calibration. Each point summarizes a confidence bin; this synthetic sample does not establish real-source reliability.")
     chosen = st.selectbox("Inspect model", list(evaluation["models"]))
     m = evaluation["models"][chosen]
     left, right = st.columns([1.3, 1])
@@ -275,10 +330,16 @@ elif page == "Model evaluation":
         per_class = pd.DataFrame(m["classification_report"]).T
         st.dataframe(per_class.loc[m["labels"], ["precision", "recall", "f1-score", "support"]].round(3), width="stretch")
     st.markdown("#### Entity extraction: strict span evaluation")
+    st.dataframe(pd.DataFrame([{"Model": name, "Validation F1": ner_evaluation["validation"][name], "Final-test F1": item["strict_entity_f1"]} for name, item in ner_evaluation["models"].items()]), hide_index=True)
     entity_rows = {k: v for k, v in ner_evaluation["report"].items() if k in ner_evaluation["labels"]}
     st.dataframe(pd.DataFrame(entity_rows).T.round(3), width="stretch")
     st.caption(f"CRF evaluated on {ner_evaluation['test_rows']} held-out narratives. An entity must have both the correct span and label to count as correct.")
-    st.caption("CRF sentence-context features were refined after initial error analysis. This is a development benchmark, not an untouched external test.")
+    st.caption("Version 2 selects the entity model using validation scores and freezes model hashes before final evaluation. Shared synthetic grammar still limits generalization.")
+    with st.expander("Confidence, uncertainty and evaluation protocol"):
+        st.markdown("Precision asks how many predictions were right. Recall asks how many true items were found. F1 balances both. Macro F1 gives each category equal weight. A confidence interval describes sampling uncertainty on this corpus, not reliability on a new source.")
+        st.json(read_artifact("evaluation_plan.json"))
+        st.json(evaluation["calibration_test"])
+        st.json(evaluation["grouped_cv"])
     if "ablation" in ner_evaluation:
         with st.expander("CRF context ablation and development disclosure"):
             st.json(ner_evaluation["ablation"])
@@ -303,9 +364,12 @@ elif page == "Topics":
     selected_topic = st.selectbox("Explore a topic", range(len(topics["topics"])), format_func=lambda i: f"Topic {i + 1:02d}: {', '.join(topics['topics'][i]['terms'][:4])}")
     topic_data = data[data.topic_id == selected_topic]
     chart(px.line(topic_data.groupby("month", observed=True).size().reset_index(name="Reports"), x="month", y="Reports", markers=True), 280)
-    st.dataframe(topic_data.nlargest(8, "topic_probability")[["report_id", "narrative", "topic_probability"]], hide_index=True, width="stretch")
+    if not topic_data.empty:
+        st.dataframe(fetch_reports(topic_data.nlargest(8, "topic_probability").index.tolist())[["report_id", "narrative", "topic_probability"]], hide_index=True, width="stretch")
+    with st.expander("LDA and NMF comparison"):
+        st.json(topics.get("comparison", topics))
 
-else:
+elif page == "Pipeline & syllabus":
     heading("Research workspace / pipeline", "A traceable research pipeline", "From generated raw reports to distributed processing, NLP models and an interactive dashboard.")
     st.markdown("**Generate → Spark SQL cleaning → partitioned Parquet → model training → corpus enrichment → dashboard**")
     a, b, c, d = st.columns(4)
@@ -327,12 +391,22 @@ else:
     st.dataframe(mapping, hide_index=True, width="stretch")
     with st.expander("Spark execution details", expanded=True):
         st.json(spark_metrics)
+        if (ARTIFACTS / "cluster_execution.json").exists():
+            st.caption("Saved standalone demonstration run; the current data run uses the master recorded above.")
+            st.json(read_artifact("cluster_execution.json"))
+    with st.expander("Data quality and physical execution plan"):
+        st.json(read_artifact("data_quality.json"))
+        st.code((ARTIFACTS / "spark_execution_plan.txt").read_text(encoding="utf-8"))
     with st.expander("Dataset provenance and evaluation limits"):
         st.json(read_artifact("dataset_manifest.json"))
         st.markdown("No real crime dataset or real-world crime-rate claim is included. Sentiment and threat heuristics have no labeled evaluation set. Summaries are extractive and require review; entity roles are predictions from fictional training examples.")
     st.markdown("**Reproduce the pipeline**")
     st.code("python scripts/download_resources.py\npython run_pipeline.py --records 60000 --master 'local[2]'\npython -m pytest -q\npython -m streamlit run app.py", language="bash")
     st.caption("Documentation: README.md · docs/REPORT.md · docs/SYLLABUS_MAPPING.md · docs/DEMO_GUIDE.md")
+
+else:
+    heading("Start here", "Understand the entire project", "A beginner's guided tour from raw text to a measured prediction.")
+    st.markdown((ROOT / "docs" / "BEGINNER_GUIDE.md").read_text(encoding="utf-8"))
 
 st.divider()
 st.caption("DECODING CRIME NARRATIVES  /  NLP & BIG DATA ANALYTICS  /  SYNTHETIC RESEARCH CORPUS")

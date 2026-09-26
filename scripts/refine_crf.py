@@ -6,6 +6,10 @@ the revised test as development evaluation, not a pristine external benchmark.
 import json
 import sys
 from pathlib import Path
+
+if __name__ == "__main__":
+    raise SystemExit("Retired V1 experiment. See artifacts/baselines/v1. Use run_pipeline.py --stage train for the V2 protocol; do not retune from viewed final-test scores.")
+
 import joblib
 import pandas as pd
 import sklearn_crfsuite

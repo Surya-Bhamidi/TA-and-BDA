@@ -1,89 +1,413 @@
 {
   "protocol": {
     "seed": 42,
-    "train_rows": 4800,
+    "train_rows": 6400,
     "validation_rows": 800,
+    "development_rows": 800,
     "test_rows": 1200,
-    "split": "Held-out scenario templates, fixed before model fitting",
+    "split": "V2 incident groups, participant phrasings and first-name pools fixed before fitting",
     "groups": {
       "train": [
-        "Arson-0",
-        "Arson-1",
-        "Arson-2",
-        "Arson-3",
-        "Arson-4",
-        "Arson-5",
-        "Assault-0",
-        "Assault-1",
-        "Assault-2",
-        "Assault-3",
-        "Assault-4",
-        "Assault-5",
-        "Burglary-0",
-        "Burglary-1",
-        "Burglary-2",
-        "Burglary-3",
-        "Burglary-4",
-        "Burglary-5",
-        "Cybercrime-0",
-        "Cybercrime-1",
-        "Cybercrime-2",
-        "Cybercrime-3",
-        "Cybercrime-4",
-        "Cybercrime-5",
-        "Fraud-0",
-        "Fraud-1",
-        "Fraud-2",
-        "Fraud-3",
-        "Fraud-4",
-        "Fraud-5",
-        "Robbery-0",
-        "Robbery-1",
-        "Robbery-2",
-        "Robbery-3",
-        "Robbery-4",
-        "Robbery-5",
-        "Theft-0",
-        "Theft-1",
-        "Theft-2",
-        "Theft-3",
-        "Theft-4",
-        "Theft-5",
-        "Vandalism-0",
-        "Vandalism-1",
-        "Vandalism-2",
-        "Vandalism-3",
-        "Vandalism-4",
-        "Vandalism-5"
+        "Arson-0-layout0",
+        "Arson-0-layout1",
+        "Arson-0-layout2",
+        "Arson-0-layout3",
+        "Arson-0-layout4",
+        "Arson-0-layout5",
+        "Arson-1-layout0",
+        "Arson-1-layout1",
+        "Arson-1-layout2",
+        "Arson-1-layout3",
+        "Arson-1-layout4",
+        "Arson-1-layout5",
+        "Arson-2-layout0",
+        "Arson-2-layout1",
+        "Arson-2-layout2",
+        "Arson-2-layout3",
+        "Arson-2-layout4",
+        "Arson-2-layout5",
+        "Arson-3-layout0",
+        "Arson-3-layout1",
+        "Arson-3-layout2",
+        "Arson-3-layout3",
+        "Arson-3-layout4",
+        "Arson-3-layout5",
+        "Arson-4-layout0",
+        "Arson-4-layout1",
+        "Arson-4-layout2",
+        "Arson-4-layout3",
+        "Arson-4-layout4",
+        "Arson-4-layout5",
+        "Assault-0-layout0",
+        "Assault-0-layout1",
+        "Assault-0-layout2",
+        "Assault-0-layout3",
+        "Assault-0-layout4",
+        "Assault-0-layout5",
+        "Assault-1-layout0",
+        "Assault-1-layout1",
+        "Assault-1-layout2",
+        "Assault-1-layout3",
+        "Assault-1-layout4",
+        "Assault-1-layout5",
+        "Assault-2-layout0",
+        "Assault-2-layout1",
+        "Assault-2-layout2",
+        "Assault-2-layout3",
+        "Assault-2-layout4",
+        "Assault-2-layout5",
+        "Assault-3-layout0",
+        "Assault-3-layout1",
+        "Assault-3-layout2",
+        "Assault-3-layout3",
+        "Assault-3-layout4",
+        "Assault-3-layout5",
+        "Assault-4-layout0",
+        "Assault-4-layout1",
+        "Assault-4-layout2",
+        "Assault-4-layout3",
+        "Assault-4-layout4",
+        "Assault-4-layout5",
+        "Burglary-0-layout0",
+        "Burglary-0-layout1",
+        "Burglary-0-layout2",
+        "Burglary-0-layout3",
+        "Burglary-0-layout4",
+        "Burglary-0-layout5",
+        "Burglary-1-layout0",
+        "Burglary-1-layout1",
+        "Burglary-1-layout2",
+        "Burglary-1-layout3",
+        "Burglary-1-layout4",
+        "Burglary-1-layout5",
+        "Burglary-2-layout0",
+        "Burglary-2-layout1",
+        "Burglary-2-layout2",
+        "Burglary-2-layout3",
+        "Burglary-2-layout4",
+        "Burglary-2-layout5",
+        "Burglary-3-layout0",
+        "Burglary-3-layout1",
+        "Burglary-3-layout2",
+        "Burglary-3-layout3",
+        "Burglary-3-layout4",
+        "Burglary-3-layout5",
+        "Burglary-4-layout0",
+        "Burglary-4-layout1",
+        "Burglary-4-layout2",
+        "Burglary-4-layout3",
+        "Burglary-4-layout4",
+        "Burglary-4-layout5",
+        "Cybercrime-0-layout0",
+        "Cybercrime-0-layout1",
+        "Cybercrime-0-layout2",
+        "Cybercrime-0-layout3",
+        "Cybercrime-0-layout4",
+        "Cybercrime-0-layout5",
+        "Cybercrime-1-layout0",
+        "Cybercrime-1-layout1",
+        "Cybercrime-1-layout2",
+        "Cybercrime-1-layout3",
+        "Cybercrime-1-layout4",
+        "Cybercrime-1-layout5",
+        "Cybercrime-2-layout0",
+        "Cybercrime-2-layout1",
+        "Cybercrime-2-layout2",
+        "Cybercrime-2-layout3",
+        "Cybercrime-2-layout4",
+        "Cybercrime-2-layout5",
+        "Cybercrime-3-layout0",
+        "Cybercrime-3-layout1",
+        "Cybercrime-3-layout2",
+        "Cybercrime-3-layout3",
+        "Cybercrime-3-layout4",
+        "Cybercrime-3-layout5",
+        "Cybercrime-4-layout0",
+        "Cybercrime-4-layout1",
+        "Cybercrime-4-layout2",
+        "Cybercrime-4-layout3",
+        "Cybercrime-4-layout4",
+        "Cybercrime-4-layout5",
+        "Fraud-0-layout0",
+        "Fraud-0-layout1",
+        "Fraud-0-layout2",
+        "Fraud-0-layout3",
+        "Fraud-0-layout4",
+        "Fraud-0-layout5",
+        "Fraud-1-layout0",
+        "Fraud-1-layout1",
+        "Fraud-1-layout2",
+        "Fraud-1-layout3",
+        "Fraud-1-layout4",
+        "Fraud-1-layout5",
+        "Fraud-2-layout0",
+        "Fraud-2-layout1",
+        "Fraud-2-layout2",
+        "Fraud-2-layout3",
+        "Fraud-2-layout4",
+        "Fraud-2-layout5",
+        "Fraud-3-layout0",
+        "Fraud-3-layout1",
+        "Fraud-3-layout2",
+        "Fraud-3-layout3",
+        "Fraud-3-layout4",
+        "Fraud-3-layout5",
+        "Fraud-4-layout0",
+        "Fraud-4-layout1",
+        "Fraud-4-layout2",
+        "Fraud-4-layout3",
+        "Fraud-4-layout4",
+        "Fraud-4-layout5",
+        "Robbery-0-layout0",
+        "Robbery-0-layout1",
+        "Robbery-0-layout2",
+        "Robbery-0-layout3",
+        "Robbery-0-layout4",
+        "Robbery-0-layout5",
+        "Robbery-1-layout0",
+        "Robbery-1-layout1",
+        "Robbery-1-layout2",
+        "Robbery-1-layout3",
+        "Robbery-1-layout4",
+        "Robbery-1-layout5",
+        "Robbery-2-layout0",
+        "Robbery-2-layout1",
+        "Robbery-2-layout2",
+        "Robbery-2-layout3",
+        "Robbery-2-layout4",
+        "Robbery-2-layout5",
+        "Robbery-3-layout0",
+        "Robbery-3-layout1",
+        "Robbery-3-layout2",
+        "Robbery-3-layout3",
+        "Robbery-3-layout4",
+        "Robbery-3-layout5",
+        "Robbery-4-layout0",
+        "Robbery-4-layout1",
+        "Robbery-4-layout2",
+        "Robbery-4-layout3",
+        "Robbery-4-layout4",
+        "Robbery-4-layout5",
+        "Theft-0-layout0",
+        "Theft-0-layout1",
+        "Theft-0-layout2",
+        "Theft-0-layout3",
+        "Theft-0-layout4",
+        "Theft-0-layout5",
+        "Theft-1-layout0",
+        "Theft-1-layout1",
+        "Theft-1-layout2",
+        "Theft-1-layout3",
+        "Theft-1-layout4",
+        "Theft-1-layout5",
+        "Theft-2-layout0",
+        "Theft-2-layout1",
+        "Theft-2-layout2",
+        "Theft-2-layout3",
+        "Theft-2-layout4",
+        "Theft-2-layout5",
+        "Theft-3-layout0",
+        "Theft-3-layout1",
+        "Theft-3-layout2",
+        "Theft-3-layout3",
+        "Theft-3-layout4",
+        "Theft-3-layout5",
+        "Theft-4-layout0",
+        "Theft-4-layout1",
+        "Theft-4-layout2",
+        "Theft-4-layout3",
+        "Theft-4-layout4",
+        "Theft-4-layout5",
+        "Vandalism-0-layout0",
+        "Vandalism-0-layout1",
+        "Vandalism-0-layout2",
+        "Vandalism-0-layout3",
+        "Vandalism-0-layout4",
+        "Vandalism-0-layout5",
+        "Vandalism-1-layout0",
+        "Vandalism-1-layout1",
+        "Vandalism-1-layout2",
+        "Vandalism-1-layout3",
+        "Vandalism-1-layout4",
+        "Vandalism-1-layout5",
+        "Vandalism-2-layout0",
+        "Vandalism-2-layout1",
+        "Vandalism-2-layout2",
+        "Vandalism-2-layout3",
+        "Vandalism-2-layout4",
+        "Vandalism-2-layout5",
+        "Vandalism-3-layout0",
+        "Vandalism-3-layout1",
+        "Vandalism-3-layout2",
+        "Vandalism-3-layout3",
+        "Vandalism-3-layout4",
+        "Vandalism-3-layout5",
+        "Vandalism-4-layout0",
+        "Vandalism-4-layout1",
+        "Vandalism-4-layout2",
+        "Vandalism-4-layout3",
+        "Vandalism-4-layout4",
+        "Vandalism-4-layout5"
       ],
       "validation": [
-        "Arson-6",
-        "Assault-6",
-        "Burglary-6",
-        "Cybercrime-6",
-        "Fraud-6",
-        "Robbery-6",
-        "Theft-6",
-        "Vandalism-6"
+        "Arson-5-layout0",
+        "Arson-5-layout1",
+        "Arson-5-layout2",
+        "Arson-5-layout3",
+        "Arson-5-layout4",
+        "Arson-5-layout5",
+        "Assault-5-layout0",
+        "Assault-5-layout1",
+        "Assault-5-layout2",
+        "Assault-5-layout3",
+        "Assault-5-layout4",
+        "Assault-5-layout5",
+        "Burglary-5-layout0",
+        "Burglary-5-layout1",
+        "Burglary-5-layout2",
+        "Burglary-5-layout3",
+        "Burglary-5-layout4",
+        "Burglary-5-layout5",
+        "Cybercrime-5-layout0",
+        "Cybercrime-5-layout1",
+        "Cybercrime-5-layout2",
+        "Cybercrime-5-layout3",
+        "Cybercrime-5-layout4",
+        "Cybercrime-5-layout5",
+        "Fraud-5-layout0",
+        "Fraud-5-layout1",
+        "Fraud-5-layout2",
+        "Fraud-5-layout3",
+        "Fraud-5-layout4",
+        "Fraud-5-layout5",
+        "Robbery-5-layout0",
+        "Robbery-5-layout1",
+        "Robbery-5-layout2",
+        "Robbery-5-layout3",
+        "Robbery-5-layout4",
+        "Robbery-5-layout5",
+        "Theft-5-layout0",
+        "Theft-5-layout1",
+        "Theft-5-layout2",
+        "Theft-5-layout3",
+        "Theft-5-layout4",
+        "Theft-5-layout5",
+        "Vandalism-5-layout0",
+        "Vandalism-5-layout1",
+        "Vandalism-5-layout2",
+        "Vandalism-5-layout3",
+        "Vandalism-5-layout4",
+        "Vandalism-5-layout5"
+      ],
+      "development": [
+        "Arson-6-layout0",
+        "Arson-6-layout1",
+        "Arson-6-layout2",
+        "Arson-6-layout3",
+        "Arson-6-layout4",
+        "Arson-6-layout5",
+        "Assault-6-layout0",
+        "Assault-6-layout1",
+        "Assault-6-layout2",
+        "Assault-6-layout3",
+        "Assault-6-layout4",
+        "Assault-6-layout5",
+        "Burglary-6-layout0",
+        "Burglary-6-layout1",
+        "Burglary-6-layout2",
+        "Burglary-6-layout3",
+        "Burglary-6-layout4",
+        "Burglary-6-layout5",
+        "Cybercrime-6-layout0",
+        "Cybercrime-6-layout1",
+        "Cybercrime-6-layout2",
+        "Cybercrime-6-layout3",
+        "Cybercrime-6-layout4",
+        "Cybercrime-6-layout5",
+        "Fraud-6-layout0",
+        "Fraud-6-layout1",
+        "Fraud-6-layout2",
+        "Fraud-6-layout3",
+        "Fraud-6-layout4",
+        "Fraud-6-layout5",
+        "Robbery-6-layout0",
+        "Robbery-6-layout1",
+        "Robbery-6-layout2",
+        "Robbery-6-layout3",
+        "Robbery-6-layout4",
+        "Robbery-6-layout5",
+        "Theft-6-layout0",
+        "Theft-6-layout1",
+        "Theft-6-layout2",
+        "Theft-6-layout3",
+        "Theft-6-layout4",
+        "Theft-6-layout5",
+        "Vandalism-6-layout0",
+        "Vandalism-6-layout1",
+        "Vandalism-6-layout2",
+        "Vandalism-6-layout3",
+        "Vandalism-6-layout4",
+        "Vandalism-6-layout5"
       ],
       "test": [
-        "Arson-7",
-        "Assault-7",
-        "Burglary-7",
-        "Cybercrime-7",
-        "Fraud-7",
-        "Robbery-7",
-        "Theft-7",
-        "Vandalism-7"
+        "Arson-7-layout0",
+        "Arson-7-layout1",
+        "Arson-7-layout2",
+        "Arson-7-layout3",
+        "Arson-7-layout4",
+        "Arson-7-layout5",
+        "Assault-7-layout0",
+        "Assault-7-layout1",
+        "Assault-7-layout2",
+        "Assault-7-layout3",
+        "Assault-7-layout4",
+        "Assault-7-layout5",
+        "Burglary-7-layout0",
+        "Burglary-7-layout1",
+        "Burglary-7-layout2",
+        "Burglary-7-layout3",
+        "Burglary-7-layout4",
+        "Burglary-7-layout5",
+        "Cybercrime-7-layout0",
+        "Cybercrime-7-layout1",
+        "Cybercrime-7-layout2",
+        "Cybercrime-7-layout3",
+        "Cybercrime-7-layout4",
+        "Cybercrime-7-layout5",
+        "Fraud-7-layout0",
+        "Fraud-7-layout1",
+        "Fraud-7-layout2",
+        "Fraud-7-layout3",
+        "Fraud-7-layout4",
+        "Fraud-7-layout5",
+        "Robbery-7-layout0",
+        "Robbery-7-layout1",
+        "Robbery-7-layout2",
+        "Robbery-7-layout3",
+        "Robbery-7-layout4",
+        "Robbery-7-layout5",
+        "Theft-7-layout0",
+        "Theft-7-layout1",
+        "Theft-7-layout2",
+        "Theft-7-layout3",
+        "Theft-7-layout4",
+        "Theft-7-layout5",
+        "Vandalism-7-layout0",
+        "Vandalism-7-layout1",
+        "Vandalism-7-layout2",
+        "Vandalism-7-layout3",
+        "Vandalism-7-layout4",
+        "Vandalism-7-layout5"
       ]
     },
-    "limitations": "Synthetic template benchmark. Shared vocabulary and generator style remain; no real-world generalization claim."
+    "selection": "Validation only; final predictions after model hashes are frozen",
+    "limitations": "Synthetic composite templates share grammar and vocabulary; this is not external real-world validation."
   },
   "models": {
     "Bag of Words": {
-      "accuracy": 0.9175,
-      "macro_f1": 0.9116419191034114,
-      "weighted_f1": 0.9116419191034114,
+      "accuracy": 0.7841666666666667,
+      "macro_f1": 0.7392547438633028,
+      "weighted_f1": 0.7392547438633028,
       "classification_report": {
         "Arson": {
           "precision": 1.0,
@@ -92,58 +416,58 @@
           "support": 150.0
         },
         "Assault": {
-          "precision": 0.7380952380952381,
-          "recall": 0.8266666666666667,
-          "f1-score": 0.779874213836478,
+          "precision": 0.5471698113207547,
+          "recall": 0.9666666666666667,
+          "f1-score": 0.6987951807228916,
           "support": 150.0
         },
         "Burglary": {
-          "precision": 0.8816568047337278,
-          "recall": 0.9933333333333333,
-          "f1-score": 0.9341692789968652,
+          "precision": 0.6428571428571429,
+          "recall": 0.3,
+          "f1-score": 0.4090909090909091,
           "support": 150.0
         },
         "Cybercrime": {
           "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
+          "recall": 0.9733333333333334,
+          "f1-score": 0.9864864864864865,
           "support": 150.0
         },
         "Fraud": {
-          "precision": 0.8152173913043478,
+          "precision": 0.9433962264150944,
           "recall": 1.0,
-          "f1-score": 0.8982035928143712,
+          "f1-score": 0.970873786407767,
           "support": 150.0
         },
         "Robbery": {
           "precision": 1.0,
-          "recall": 0.52,
-          "f1-score": 0.6842105263157895,
+          "recall": 0.06666666666666667,
+          "f1-score": 0.125,
           "support": 150.0
         },
         "Theft": {
           "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
+          "recall": 0.9666666666666667,
+          "f1-score": 0.9830508474576272,
           "support": 150.0
         },
         "Vandalism": {
-          "precision": 0.9933774834437086,
+          "precision": 0.5882352941176471,
           "recall": 1.0,
-          "f1-score": 0.9966777408637874,
+          "f1-score": 0.7407407407407407,
           "support": 150.0
         },
-        "accuracy": 0.9175,
+        "accuracy": 0.7841666666666667,
         "macro avg": {
-          "precision": 0.9285433646971277,
-          "recall": 0.9175,
-          "f1-score": 0.9116419191034114,
+          "precision": 0.8402073093388298,
+          "recall": 0.7841666666666667,
+          "f1-score": 0.7392547438633028,
           "support": 1200.0
         },
         "weighted avg": {
-          "precision": 0.9285433646971277,
-          "recall": 0.9175,
-          "f1-score": 0.9116419191034114,
+          "precision": 0.8402073093388299,
+          "recall": 0.7841666666666667,
+          "f1-score": 0.7392547438633028,
           "support": 1200.0
         }
       },
@@ -160,10 +484,10 @@
         ],
         [
           0,
-          124,
-          20,
+          145,
+          5,
           0,
-          6,
+          0,
           0,
           0,
           0
@@ -171,51 +495,51 @@
         [
           0,
           0,
-          149,
+          45,
           0,
           0,
           0,
           0,
-          1
+          105
         ],
         [
+          0,
+          4,
+          0,
+          146,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
           0,
           0,
           0,
           150,
           0,
           0,
+          0
+        ],
+        [
+          0,
+          116,
+          15,
+          0,
+          9,
+          10,
           0,
           0
         ],
         [
           0,
           0,
-          0,
-          0,
-          150,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          44,
-          0,
-          0,
-          28,
-          78,
-          0,
-          0
-        ],
-        [
+          5,
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          150,
+          145,
           0
         ],
         [
@@ -239,13 +563,17 @@
         "Theft",
         "Vandalism"
       ],
-      "seconds": 0.6,
-      "dimensions": 3702
+      "accuracy_ci95": [
+        0.7633333333333333,
+        0.8091875000000001
+      ],
+      "ci_note": "400 report-level bootstrap resamples; excludes uncertainty from new templates or real-world sources.",
+      "train_seconds": 0.6737691999951494
     },
     "TF-IDF": {
-      "accuracy": 0.8458333333333333,
-      "macro_f1": 0.8005031577061226,
-      "weighted_f1": 0.8005031577061226,
+      "accuracy": 0.8366666666666667,
+      "macro_f1": 0.793381833244038,
+      "weighted_f1": 0.793381833244038,
       "classification_report": {
         "Arson": {
           "precision": 1.0,
@@ -254,9 +582,9 @@
           "support": 150.0
         },
         "Assault": {
-          "precision": 0.9863013698630136,
-          "recall": 0.96,
-          "f1-score": 0.972972972972973,
+          "precision": 0.8620689655172413,
+          "recall": 1.0,
+          "f1-score": 0.9259259259259259,
           "support": 150.0
         },
         "Burglary": {
@@ -272,365 +600,40 @@
           "support": 150.0
         },
         "Fraud": {
-          "precision": 0.8982035928143712,
+          "precision": 0.9259259259259259,
           "recall": 1.0,
-          "f1-score": 0.9463722397476341,
+          "f1-score": 0.9615384615384616,
           "support": 150.0
         },
         "Robbery": {
           "precision": 1.0,
-          "recall": 0.8066666666666666,
-          "f1-score": 0.8929889298892989,
+          "recall": 0.6933333333333334,
+          "f1-score": 0.8188976377952756,
           "support": 150.0
         },
         "Theft": {
-          "precision": 0.672645739910314,
+          "precision": 0.9493670886075949,
           "recall": 1.0,
-          "f1-score": 0.8042895442359249,
+          "f1-score": 0.974025974025974,
           "support": 150.0
         },
         "Vandalism": {
-          "precision": 0.6493506493506493,
+          "precision": 0.5,
           "recall": 1.0,
-          "f1-score": 0.7874015748031497,
-          "support": 150.0
-        },
-        "accuracy": 0.8458333333333333,
-        "macro avg": {
-          "precision": 0.7758126689922935,
-          "recall": 0.8458333333333333,
-          "f1-score": 0.8005031577061226,
-          "support": 1200.0
-        },
-        "weighted avg": {
-          "precision": 0.7758126689922936,
-          "recall": 0.8458333333333333,
-          "f1-score": 0.8005031577061226,
-          "support": 1200.0
-        }
-      },
-      "confusion_matrix": [
-        [
-          150,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          144,
-          0,
-          0,
-          4,
-          0,
-          0,
-          2
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          71,
-          79
-        ],
-        [
-          0,
-          0,
-          0,
-          150,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          150,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          2,
-          12,
-          0,
-          13,
-          121,
-          2,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          150,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          150
-        ]
-      ],
-      "labels": [
-        "Arson",
-        "Assault",
-        "Burglary",
-        "Cybercrime",
-        "Fraud",
-        "Robbery",
-        "Theft",
-        "Vandalism"
-      ],
-      "seconds": 0.42,
-      "dimensions": 3702
-    },
-    "Word2Vec": {
-      "accuracy": 0.9075,
-      "macro_f1": 0.9054537991569651,
-      "weighted_f1": 0.905453799156965,
-      "classification_report": {
-        "Arson": {
-          "precision": 0.9202453987730062,
-          "recall": 1.0,
-          "f1-score": 0.9584664536741214,
-          "support": 150.0
-        },
-        "Assault": {
-          "precision": 1.0,
-          "recall": 0.8466666666666667,
-          "f1-score": 0.9169675090252708,
-          "support": 150.0
-        },
-        "Burglary": {
-          "precision": 0.8545454545454545,
-          "recall": 0.6266666666666667,
-          "f1-score": 0.7230769230769231,
-          "support": 150.0
-        },
-        "Cybercrime": {
-          "precision": 1.0,
-          "recall": 0.8,
-          "f1-score": 0.8888888888888888,
-          "support": 150.0
-        },
-        "Fraud": {
-          "precision": 0.8522727272727273,
-          "recall": 1.0,
-          "f1-score": 0.9202453987730062,
-          "support": 150.0
-        },
-        "Robbery": {
-          "precision": 1.0,
-          "recall": 0.9866666666666667,
-          "f1-score": 0.9932885906040269,
-          "support": 150.0
-        },
-        "Theft": {
-          "precision": 0.7281553398058253,
-          "recall": 1.0,
-          "f1-score": 0.8426966292134831,
-          "support": 150.0
-        },
-        "Vandalism": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
-          "support": 150.0
-        },
-        "accuracy": 0.9075,
-        "macro avg": {
-          "precision": 0.9194023650496267,
-          "recall": 0.9075,
-          "f1-score": 0.9054537991569651,
-          "support": 1200.0
-        },
-        "weighted avg": {
-          "precision": 0.9194023650496267,
-          "recall": 0.9075,
-          "f1-score": 0.905453799156965,
-          "support": 1200.0
-        }
-      },
-      "confusion_matrix": [
-        [
-          150,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          13,
-          127,
-          0,
-          0,
-          10,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          94,
-          0,
-          0,
-          0,
-          56,
-          0
-        ],
-        [
-          0,
-          0,
-          16,
-          120,
-          14,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          150,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          2,
-          148,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          150,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          150
-        ]
-      ],
-      "labels": [
-        "Arson",
-        "Assault",
-        "Burglary",
-        "Cybercrime",
-        "Fraud",
-        "Robbery",
-        "Theft",
-        "Vandalism"
-      ],
-      "seconds": 4.25,
-      "dimensions": 100,
-      "architecture": "Gensim neural skip-gram with negative sampling; mean document pooling"
-    },
-    "BERT": {
-      "accuracy": 0.8366666666666667,
-      "macro_f1": 0.8142713578775433,
-      "weighted_f1": 0.8142713578775432,
-      "classification_report": {
-        "Arson": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
-          "support": 150.0
-        },
-        "Assault": {
-          "precision": 0.6550218340611353,
-          "recall": 1.0,
-          "f1-score": 0.7915567282321899,
-          "support": 150.0
-        },
-        "Burglary": {
-          "precision": 1.0,
-          "recall": 0.22,
-          "f1-score": 0.36065573770491804,
-          "support": 150.0
-        },
-        "Cybercrime": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
-          "support": 150.0
-        },
-        "Fraud": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
-          "support": 150.0
-        },
-        "Robbery": {
-          "precision": 1.0,
-          "recall": 0.47333333333333333,
-          "f1-score": 0.6425339366515838,
-          "support": 150.0
-        },
-        "Theft": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1-score": 1.0,
-          "support": 150.0
-        },
-        "Vandalism": {
-          "precision": 0.5617977528089888,
-          "recall": 1.0,
-          "f1-score": 0.7194244604316546,
+          "f1-score": 0.6666666666666666,
           "support": 150.0
         },
         "accuracy": 0.8366666666666667,
         "macro avg": {
-          "precision": 0.9021024483587655,
+          "precision": 0.7796702475063453,
           "recall": 0.8366666666666667,
-          "f1-score": 0.8142713578775433,
+          "f1-score": 0.793381833244038,
           "support": 1200.0
         },
         "weighted avg": {
-          "precision": 0.9021024483587655,
+          "precision": 0.7796702475063453,
           "recall": 0.8366666666666667,
-          "f1-score": 0.8142713578775432,
+          "f1-score": 0.793381833244038,
           "support": 1200.0
         }
       },
@@ -658,12 +661,12 @@
         [
           0,
           0,
-          33,
           0,
           0,
           0,
           0,
-          117
+          0,
+          150
         ],
         [
           0,
@@ -687,11 +690,177 @@
         ],
         [
           0,
-          79,
+          24,
+          2,
+          0,
+          12,
+          104,
+          8,
+          0
+        ],
+        [
           0,
           0,
           0,
-          71,
+          0,
+          0,
+          0,
+          150,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          150
+        ]
+      ],
+      "labels": [
+        "Arson",
+        "Assault",
+        "Burglary",
+        "Cybercrime",
+        "Fraud",
+        "Robbery",
+        "Theft",
+        "Vandalism"
+      ],
+      "accuracy_ci95": [
+        0.8175,
+        0.8575
+      ],
+      "ci_note": "400 report-level bootstrap resamples; excludes uncertainty from new templates or real-world sources.",
+      "train_seconds": 0.49274520000471966
+    },
+    "Word2Vec": {
+      "accuracy": 0.9516666666666667,
+      "macro_f1": 0.9504876659901301,
+      "weighted_f1": 0.9504876659901301,
+      "classification_report": {
+        "Arson": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 150.0
+        },
+        "Assault": {
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "f1-score": 0.9230769230769231,
+          "support": 150.0
+        },
+        "Burglary": {
+          "precision": 0.8940397350993378,
+          "recall": 0.9,
+          "f1-score": 0.8970099667774086,
+          "support": 150.0
+        },
+        "Cybercrime": {
+          "precision": 0.9868421052631579,
+          "recall": 1.0,
+          "f1-score": 0.9933774834437086,
+          "support": 150.0
+        },
+        "Fraud": {
+          "precision": 1.0,
+          "recall": 0.9733333333333334,
+          "f1-score": 0.9864864864864865,
+          "support": 150.0
+        },
+        "Robbery": {
+          "precision": 0.888,
+          "recall": 0.74,
+          "f1-score": 0.8072727272727273,
+          "support": 150.0
+        },
+        "Theft": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 150.0
+        },
+        "Vandalism": {
+          "precision": 0.9933774834437086,
+          "recall": 1.0,
+          "f1-score": 0.9966777408637874,
+          "support": 150.0
+        },
+        "accuracy": 0.9516666666666667,
+        "macro avg": {
+          "precision": 0.9524252726186326,
+          "recall": 0.9516666666666667,
+          "f1-score": 0.9504876659901301,
+          "support": 1200.0
+        },
+        "weighted avg": {
+          "precision": 0.9524252726186326,
+          "recall": 0.9516666666666667,
+          "f1-score": 0.9504876659901301,
+          "support": 1200.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          150,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          150,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          135,
+          0,
+          0,
+          14,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          150,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          2,
+          146,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          23,
+          16,
+          0,
+          0,
+          111,
           0,
           0
         ],
@@ -726,28 +895,453 @@
         "Theft",
         "Vandalism"
       ],
+      "accuracy_ci95": [
+        0.94,
+        0.9625
+      ],
+      "ci_note": "400 report-level bootstrap resamples; excludes uncertainty from new templates or real-world sources.",
+      "train_seconds": 6.012355499995465
+    },
+    "BERT": {
+      "accuracy": 0.8325,
+      "macro_f1": 0.7905703281948777,
+      "weighted_f1": 0.7905703281948778,
+      "classification_report": {
+        "Arson": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 150.0
+        },
+        "Assault": {
+          "precision": 0.8928571428571429,
+          "recall": 1.0,
+          "f1-score": 0.9433962264150944,
+          "support": 150.0
+        },
+        "Burglary": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6666666666666666,
+          "support": 150.0
+        },
+        "Cybercrime": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 150.0
+        },
+        "Fraud": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 150.0
+        },
+        "Robbery": {
+          "precision": 0.8,
+          "recall": 0.88,
+          "f1-score": 0.8380952380952381,
+          "support": 150.0
+        },
+        "Theft": {
+          "precision": 1.0,
+          "recall": 0.78,
+          "f1-score": 0.8764044943820225,
+          "support": 150.0
+        },
+        "Vandalism": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 150.0
+        },
+        "accuracy": 0.8325,
+        "macro avg": {
+          "precision": 0.7741071428571429,
+          "recall": 0.8325,
+          "f1-score": 0.7905703281948777,
+          "support": 1200.0
+        },
+        "weighted avg": {
+          "precision": 0.7741071428571429,
+          "recall": 0.8325,
+          "f1-score": 0.7905703281948778,
+          "support": 1200.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          150,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          150,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          150,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          150,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          150,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          18,
+          0,
+          0,
+          0,
+          132,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          33,
+          117,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          150
+        ]
+      ],
+      "labels": [
+        "Arson",
+        "Assault",
+        "Burglary",
+        "Cybercrime",
+        "Fraud",
+        "Robbery",
+        "Theft",
+        "Vandalism"
+      ],
+      "accuracy_ci95": [
+        0.8124791666666666,
+        0.8516875
+      ],
+      "ci_note": "400 report-level bootstrap resamples; excludes uncertainty from new templates or real-world sources.",
+      "train_seconds": 112.43,
       "history": [
         {
           "epoch": 1,
-          "loss": 0.6231357178340355,
-          "validation_macro_f1": 0.7439338602214808
+          "loss": 0.5644288887921721,
+          "validation_macro_f1": 0.5700239566463475
         },
         {
           "epoch": 2,
-          "loss": 0.013228060075392326,
-          "validation_macro_f1": 0.7415575916682609
+          "loss": 0.008853650647215544,
+          "validation_macro_f1": 0.5673091246256335
         },
         {
           "epoch": 3,
-          "loss": 0.005079922596924007,
-          "validation_macro_f1": 0.7580016950035586
+          "loss": 0.0033895520493388174,
+          "validation_macro_f1": 0.5676687452206399
+        },
+        {
+          "epoch": 4,
+          "loss": 0.001882842592895031,
+          "validation_macro_f1": 0.5689331647243497
         }
       ],
-      "best_validation_macro_f1": 0.7580016950035586,
-      "train_seconds": 62.96,
+      "best_validation_macro_f1": 0.5700239566463475,
       "architecture": "Pretrained BERT: 2 layers, 128 hidden units, 2 attention heads; all layers fine-tuned",
-      "max_tokens": 160,
-      "dimensions": 128
+      "max_tokens": 160
     }
+  },
+  "grouped_cv": {
+    "model": "TF-IDF",
+    "fold_macro_f1": [
+      0.17661741276436224,
+      0.23057670096200425,
+      0.34338255409889895
+    ],
+    "mean": 0.25019222260842183,
+    "groups": "incident variants within training only"
+  },
+  "calibration_development": {
+    "before": {
+      "ece": 0.5463254781513655,
+      "log_loss": 1.0091485302504708,
+      "threshold": 0.6,
+      "coverage": 0.16,
+      "accuracy_when_accepted": 1.0,
+      "bins": [
+        {
+          "bin_start": 0.1,
+          "mean_confidence": 0.17853238385320094,
+          "accuracy": 0.4642857142857143,
+          "count": 28
+        },
+        {
+          "bin_start": 0.2,
+          "mean_confidence": 0.2533476609492892,
+          "accuracy": 0.9920948616600791,
+          "count": 253
+        },
+        {
+          "bin_start": 0.3,
+          "mean_confidence": 0.34530184170813194,
+          "accuracy": 0.9390243902439024,
+          "count": 246
+        },
+        {
+          "bin_start": 0.4,
+          "mean_confidence": 0.43909713064969563,
+          "accuracy": 0.90625,
+          "count": 96
+        },
+        {
+          "bin_start": 0.5,
+          "mean_confidence": 0.5556037466765288,
+          "accuracy": 1.0,
+          "count": 49
+        },
+        {
+          "bin_start": 0.6,
+          "mean_confidence": 0.6438458579589631,
+          "accuracy": 1.0,
+          "count": 34
+        },
+        {
+          "bin_start": 0.7,
+          "mean_confidence": 0.7489080695977806,
+          "accuracy": 1.0,
+          "count": 31
+        },
+        {
+          "bin_start": 0.8,
+          "mean_confidence": 0.8469322519742118,
+          "accuracy": 1.0,
+          "count": 62
+        },
+        {
+          "bin_start": 0.9,
+          "mean_confidence": 0.9048823705896674,
+          "accuracy": 1.0,
+          "count": 1
+        }
+      ]
+    },
+    "after": {
+      "ece": 0.18130179702187252,
+      "log_loss": 0.3223279192181054,
+      "threshold": 0.6,
+      "coverage": 0.78375,
+      "accuracy_when_accepted": 0.9856459330143541,
+      "bins": [
+        {
+          "bin_start": 0.2,
+          "mean_confidence": 0.2640913897232493,
+          "accuracy": 0.375,
+          "count": 16
+        },
+        {
+          "bin_start": 0.3,
+          "mean_confidence": 0.36508730425170244,
+          "accuracy": 0.5833333333333334,
+          "count": 12
+        },
+        {
+          "bin_start": 0.4,
+          "mean_confidence": 0.459762137992774,
+          "accuracy": 0.9591836734693877,
+          "count": 49
+        },
+        {
+          "bin_start": 0.5,
+          "mean_confidence": 0.5563077277234446,
+          "accuracy": 0.84375,
+          "count": 96
+        },
+        {
+          "bin_start": 0.6,
+          "mean_confidence": 0.6497197694526697,
+          "accuracy": 0.9176470588235294,
+          "count": 85
+        },
+        {
+          "bin_start": 0.7,
+          "mean_confidence": 0.7478917852294793,
+          "accuracy": 0.9857142857142858,
+          "count": 140
+        },
+        {
+          "bin_start": 0.8,
+          "mean_confidence": 0.8534940184857623,
+          "accuracy": 1.0,
+          "count": 171
+        },
+        {
+          "bin_start": 0.9,
+          "mean_confidence": 0.9677041488144743,
+          "accuracy": 1.0,
+          "count": 231
+        }
+      ]
+    },
+    "temperature": 0.3097930105717544
+  },
+  "calibration_test": {
+    "before": {
+      "ece": 0.3830345348123939,
+      "log_loss": 0.9475702334252961,
+      "threshold": 0.6,
+      "coverage": 0.20333333333333334,
+      "accuracy_when_accepted": 1.0,
+      "bins": [
+        {
+          "bin_start": 0.1,
+          "mean_confidence": 0.16810047003728076,
+          "accuracy": 0.37142857142857144,
+          "count": 35
+        },
+        {
+          "bin_start": 0.2,
+          "mean_confidence": 0.27473197199840377,
+          "accuracy": 0.6190476190476191,
+          "count": 126
+        },
+        {
+          "bin_start": 0.3,
+          "mean_confidence": 0.34489167605325116,
+          "accuracy": 0.726457399103139,
+          "count": 446
+        },
+        {
+          "bin_start": 0.4,
+          "mean_confidence": 0.44653095623415906,
+          "accuracy": 0.978021978021978,
+          "count": 182
+        },
+        {
+          "bin_start": 0.5,
+          "mean_confidence": 0.5443168769652349,
+          "accuracy": 1.0,
+          "count": 167
+        },
+        {
+          "bin_start": 0.6,
+          "mean_confidence": 0.6504381527104907,
+          "accuracy": 1.0,
+          "count": 115
+        },
+        {
+          "bin_start": 0.7,
+          "mean_confidence": 0.7492033756698085,
+          "accuracy": 1.0,
+          "count": 54
+        },
+        {
+          "bin_start": 0.8,
+          "mean_confidence": 0.8348027126211506,
+          "accuracy": 1.0,
+          "count": 75
+        }
+      ]
+    },
+    "after": {
+      "ece": 0.07573689640291205,
+      "log_loss": 0.46683240397412834,
+      "threshold": 0.6,
+      "coverage": 0.9216666666666666,
+      "accuracy_when_accepted": 0.8580470162748643,
+      "bins": [
+        {
+          "bin_start": 0.2,
+          "mean_confidence": 0.23517335318389804,
+          "accuracy": 0.12,
+          "count": 25
+        },
+        {
+          "bin_start": 0.3,
+          "mean_confidence": 0.358873172549431,
+          "accuracy": 1.0,
+          "count": 9
+        },
+        {
+          "bin_start": 0.4,
+          "mean_confidence": 0.46767468169690596,
+          "accuracy": 0.9090909090909091,
+          "count": 11
+        },
+        {
+          "bin_start": 0.5,
+          "mean_confidence": 0.5570302103868413,
+          "accuracy": 0.673469387755102,
+          "count": 49
+        },
+        {
+          "bin_start": 0.6,
+          "mean_confidence": 0.6553813603016645,
+          "accuracy": 0.5806451612903226,
+          "count": 62
+        },
+        {
+          "bin_start": 0.7,
+          "mean_confidence": 0.7630440654287751,
+          "accuracy": 0.6204379562043796,
+          "count": 137
+        },
+        {
+          "bin_start": 0.8,
+          "mean_confidence": 0.8535353428926367,
+          "accuracy": 0.7439446366782007,
+          "count": 289
+        },
+        {
+          "bin_start": 0.9,
+          "mean_confidence": 0.9662923837928064,
+          "accuracy": 0.9919093851132686,
+          "count": 618
+        }
+      ]
+    },
+    "temperature": 0.3097930105717544
   }
 }

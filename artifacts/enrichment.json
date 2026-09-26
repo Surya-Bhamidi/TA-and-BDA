@@ -1,8 +1,8 @@
 {
   "rows": 60000,
-  "seconds": 67.51,
+  "seconds": 846.44,
   "batch_size": 1000,
-  "classification": "TF-IDF logistic regression",
+  "classification": "TF-IDF logistic regression + validation temperature calibration",
   "entities": "CRF predictions",
   "sentiment": "NLTK VADER compound polarity; not an independently validated threat score",
   "threat": "Separate transparent cue heuristic, not calibrated risk",

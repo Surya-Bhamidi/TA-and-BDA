@@ -1,34 +1,39 @@
 # Decoding Crime Narratives using NLP and Big Data Analytics
 
-A complete university project: **60,000 fictional reports**, real **Apache Spark** processing, four comparable NLP classifiers, **fine-tuned BERT**, **CRF entity extraction**, **LDA topics**, **spaCy syntax**, **NLTK sentiment**, **TextRank summaries**, and a **Streamlit dashboard**.
+**Version 2** is a complete university project with 60,000 fictional reports, Apache Spark, four document classifiers, CRF and BERT entity extraction, LDA/NMF topics, semantic search, spaCy syntax, VADER polarity, TextRank summaries and a seven-page Streamlit dashboard.
 
-## Get the project from GitHub
+## Start here
+
+Read the [beginner guide](docs/BEGINNER_GUIDE.md), then the [complete project report PDF](docs/PROJECT_REPORT.pdf). The report explains the problem, follows a narrative through every stage, teaches each model with examples, explains metrics and includes setup, troubleshooting, a code tour and viva questions.
+
+- [Editable report](docs/REPORT.md) and [standalone HTML report](docs/PROJECT_REPORT.html)
+- [Measured results](docs/RESULTS.md)
+- [Demonstration walkthrough](docs/DEMO_GUIDE.md)
+- [Delivered improvements and remaining work](docs/IMPROVEMENTS_V2.md)
+- [Syllabus mapping](docs/SYLLABUS_MAPPING.md), [model card](docs/MODEL_CARD.md), [data card](docs/DATA_CARD.md)
+
+**.pytest_cache/README.md is a pytest cache note, not the project guide.**
+
+## Open the completed local project
+
+Run **START_DASHBOARD.cmd**, then open **http://localhost:8501**. Alternatively, from this folder:
+
+```powershell
+.\.venv312\Scripts\python.exe -m streamlit run app.py
+```
+
+The pages are Overview, Case explorer, Narrative lab, Model evaluation, Topics, Pipeline & syllabus, and Learning guide. Models and data already exist in the completed local workspace. Inference uses local resources after the initial downloads.
+
+## Get the source and rebuild
 
 ```bash
 git clone https://github.com/Surya-Bhamidi/TA-and-BDA.git
 cd TA-and-BDA
 ```
 
-The repository includes source code, tests, reports, screenshots and measured evaluation results. Generated datasets, trained model weights, the search index, virtual environments and downloaded runtimes are excluded from Git. Follow **Reproduce from a fresh installation** below to generate them. The completed local workspace already contains those generated files.
+The private repository requires an authorized GitHub account. Source, tests, documentation, screenshots and measured results are tracked. Large datasets, weights, search indexes, virtual environments and downloaded runtimes are excluded. A fresh clone must run the pipeline.
 
-## Open the completed project
-
-On this computer, double-click **`START_DASHBOARD.cmd`** and visit **http://localhost:8501**. The dataset, trained models and measured results are already in this folder after the completed build. No model downloads are needed for ordinary dashboard use.
-
-PowerShell alternative:
-
-```powershell
-cd 'path\to\TA-and-BDA'
-.\.venv312\Scripts\python.exe -m streamlit run app.py
-```
-
-The six pages provide trends and filters, ranked case search, entity and dependency visualizations, analysis of pasted/uploaded text, model comparisons, topic exploration, and pipeline/syllabus details. `docs/DEMO_GUIDE.md` gives a presentation walkthrough.
-
-Submission documents: **`docs/PROJECT_REPORT.pdf`**, the standalone printable **`docs/PROJECT_REPORT.html`**, and the measured-results sheet **`docs/RESULTS.md`**. Dashboard screenshots are in `docs/screenshots/`.
-
-## Reproduce from a fresh installation
-
-Use **Python 3.12** and **Java 17**. Allow roughly 3–5 GB of disk space and at least 8 GB of RAM; runtime depends on hardware. Python 3.14 is not recommended because Gensim 4.4.0 has no Windows wheel for it. This project uses an isolated `.venv312` environment and a project-local Java runtime on Windows.
+Use **Python 3.12 and Java 17**. Allow several GB of disk and at least 8 GB RAM. From PowerShell:
 
 ```powershell
 py -3.12 -m venv .venv312
@@ -39,115 +44,111 @@ py -3.12 -m venv .venv312
 .\.venv312\Scripts\python.exe -m streamlit run app.py
 ```
 
-`scripts/setup.ps1` automates the Windows environment, dependency install, checksum-verified official Java download, NLP resources, and full pipeline. Existing `C:\hadoop\bin\winutils.exe` and `hadoop.dll` are used on the build computer. On another Windows machine, set `HADOOP_HOME` to a trusted, compatible Hadoop native distribution. Linux/Docker avoids this Windows-specific dependency.
+scripts/setup.ps1 automates Windows setup. The build computer uses project-local Java and existing compatible Hadoop native libraries under C:\hadoop\bin. On another Windows machine, set HADOOP_HOME to a trusted compatible distribution. Linux avoids that native-library requirement: create/activate a Python 3.12 venv, install Java 17 and requirements, then run the same scripts with python. Resolved package versions are in requirements-lock.txt.
 
-On Linux, create a virtual environment, install Java 17 and `requirements.txt`, set `JAVA_HOME`, and use the same Python commands. The exact resolved Python packages from this build are recorded in `requirements-lock.txt`; the broader `requirements.txt` documents supported package ranges.
+## Pipeline and reproducibility
 
-## Pipeline commands
+```text
+Generate JSONL -> Spark clean/deduplicate -> partitioned Parquet
+ -> train/validation/development/final-test protocol
+ -> model fitting and validation selection -> freeze hashes -> final evaluation
+ -> full-corpus enrichment -> SQLite + keyword/semantic indexes -> dashboard
+```
+
+Spark processes all 60,000 clean reports. NLP training uses bounded driver-side samples, and enrichment runs in Python batches. The overview reads metadata; selected full narratives come from SQLite.
+
+Version 2 was verified using a standalone master and **two worker processes on one physical host**. It is not a multi-machine scalability benchmark. The default pipeline uses local[2].
 
 ```powershell
-# Complete run (default)
-.\.venv312\Scripts\python.exe run_pipeline.py --records 60000 --master 'local[2]'
-
-# Individual restartable stages; execute in this order
+# Separate stages
 .\.venv312\Scripts\python.exe run_pipeline.py --stage generate
 .\.venv312\Scripts\python.exe run_pipeline.py --stage spark
 .\.venv312\Scripts\python.exe run_pipeline.py --stage train
 .\.venv312\Scripts\python.exe run_pipeline.py --stage enrich
 
-# Scala functional programming and Spark Dataset demonstration
+# Instead of the local Spark stage: Windows standalone master + two workers
+.\.venv312\Scripts\python.exe scripts\run_cluster.py
+
+# Skip only stages whose source/input/output hashes still match
+.\.venv312\Scripts\python.exe run_pipeline.py --resume
+
+# Scala functional-programming and Spark Dataset example
 .\.venv312\Scripts\python.exe scripts\run_scala.py
 ```
 
-Generation overwrites the generated raw corpus. Spark overwrites derived Parquet/model directories. Training overwrites model artifacts. Re-run **all downstream stages** after changing an upstream stage; stop the dashboard while rebuilding. The script records each invocation in `artifacts/run_<stage>.json` and raises errors rather than substituting fake outputs.
+Stop the dashboard before rebuilding. Changing an upstream stage requires downstream rebuilding. Resume is conservative: source changes invalidate recorded stages. settings.toml centralizes defaults; run receipts and stage hashes document execution.
 
-## Architecture
+## What Version 2 adds
 
-```mermaid
-flowchart LR
-  A[Seeded synthetic generator<br/>60,000 valid + 2,700 dirty rows] --> B[Spark SQL<br/>8 partitions, cleaning, deduplication]
-  B --> C[Parquet<br/>train / validation / test]
-  C --> D[Spark MLlib<br/>distributed classification baseline]
-  C --> E[BoW · TF-IDF · Word2Vec · BERT]
-  C --> F[CRF BIO tagging · LDA]
-  E --> G[Full-corpus enrichment<br/>predictions, entities, topics, sentiment]
-  F --> G
-  G --> H[Streamlit dashboard]
-  I[spaCy syntax · TextRank summary] --> H
-```
-
-**Spark genuinely performs cleaning, SQL aggregation, Parquet writing, and MLlib fitting.** The verified run uses `local[2]`, two local execution cores, not a multi-machine cluster. NLP model training uses bounded, stratified driver-side samples; full-corpus enrichment runs in Python batches. The app loads 60,000 rows into memory. This is a teaching-scale pipeline, not an unbounded production serving system.
-
-## What is implemented
-
-| Component | Implementation |
+| Area | Implementation |
 |---|---|
-| Data | 8 categories, 6 fictional districts, 2023–2025, 64 scenario groups, exact gold entity offsets |
-| Cleaning | Explicit schema, null/blank/date validation, lowercase normalization, SHA-256 content deduplication; original text preserved |
-| Representation comparison | BoW and TF-IDF logistic regression vs trained Gensim neural skip-gram document embeddings vs fine-tuned BERT |
-| Transformer | `google/bert_uncased_L-2_H-128_A-2`, pretrained two-layer BERT, all layers trained with a classification head |
-| Sequence tagging | Linear-chain CRF with BIO labels: SUSPECT, VICTIM, LOCATION, WEAPON |
-| Topic modeling | Eight unsupervised LDA topics, held-out perplexity and top-term diversity |
-| Linguistics | spaCy tokens, lemmas, morphology, POS, dependency heads and interactive sentence graphs |
-| Sentiment | NLTK VADER compound polarity; a separate, transparent negation-aware threat-language heuristic |
-| Summarization | Extractive TextRank using sentence TF-IDF cosine graphs and a small lead-sentence prior |
-| Search | Sparse TF-IDF corpus retrieval plus within-case evidence sentence retrieval |
-| Big Data syllabus | Spark MLlib pipeline plus executable Scala case classes, traits, collections, higher-order functions and pattern matching |
-| Evaluation | Accuracy, macro/weighted F1, per-class precision/recall, confusion matrices, strict CRF span F1, BERT validation curves |
+| Data | 384 composite scenario groups, varied layouts, unknown/multiple participants, eight entity types |
+| Document models | BoW, TF-IDF, neural Word2Vec averaging and fine-tuned two-layer BERT |
+| Entity models | CRF and BERT BIO tagging; validation-selected default |
+| Topics | Lemmatized content words, LDA perplexity/coherence/diversity and NMF top terms |
+| Evaluation | Four splits, grouped training CV, frozen hashes, bootstrap intervals, calibration and review flags |
+| Search | Keyword, MiniLM semantic and reciprocal-rank hybrid retrieval; entity filters and source-sentence citations |
+| Dashboard | Pagination, disk-backed case lookup, feature explanations and a beginner Learning Guide |
+| Privacy | Optional shared password, redacted text export, explicit local corrections stored with a text hash |
+| Ingestion | Validated external JSONL staging, quarantine and source/license receipt |
+| Engineering | Data-quality reports, physical Spark plan, unit/integration/UI tests and CI configuration |
 
-See `docs/SYLLABUS_MAPPING.md` for the detailed unit mapping.
+## Read the scores correctly
 
-## Evaluation integrity
+Document models use 6,400 training, 800 validation, 800 development and 1,200 final-test examples. NER uses 3,200 training, 400 validation and 600 final-test examples. Incident variants, participant phrasings and first-name pools are split-specific; grammar and vocabulary remain shared.
 
-Templates 0–5 within each crime category are reserved for training, template 6 for validation, and template 7 for testing. The comparison uses 4,800 / 800 / 1,200 reports respectively. Vectorizers, Word2Vec, LDA and CRF fit on training text only; BERT checkpoints are selected using validation macro-F1. The MLlib baseline uses the full training and test partitions and is reported separately. `artifacts/*_ids.csv` make the sampled splits auditable.
+Vectorizers and Word2Vec fit on training only. Validation selects checkpoints and fits temperature. Model hashes are frozen before final predictions. TF-IDF remains the dashboard category model for speed and explanations; it is not advertised as the highest-scoring model. CRF wins the entity-model validation comparison in this release.
 
-All metrics are computed during execution. These fictional templates share language and generator conventions; even high scores do **not** demonstrate real-world forensic validity. POS/parsing, VADER, summaries and threat heuristics have no gold reference benchmark in this dataset and are not assigned invented accuracy figures. Roles extracted from allegations are not established facts.
+V1 artifacts are archived under artifacts/baselines/v1. V1 and V2 have different data/protocols, so score changes do not isolate an algorithmic improvement. No human-reference accuracy is claimed for syntax, polarity, threat cues, retrieval or summaries. Synthetic trends are not real crime rates.
 
-The initial CRF's role errors led to adding sentence-level context observations. The original result and validation comparison are retained in `artifacts/ner_initial_baseline.json` and `artifacts/ner_context_ablation.json`. Since initial test errors informed this revision, the revised CRF score is explicitly a **development benchmark**, not an untouched final test. The final training source includes the revised features; `scripts/refine_crf.py` documents the one-time ablation performed during development.
+## External JSONL staging
 
-## Files
+Each line must contain report_id, narrative, reported_at (ISO date/time), and district. Optional crime_type must be one of the eight categories; optional entities contain start/end/text/label with exact non-overlapping character spans.
 
-```text
-app.py                        Streamlit dashboard
-run_pipeline.py               Stage orchestration and run manifests
-crime_nlp/                    Generator, Spark, training, BERT, enrichment, inference
-data/raw/reports.jsonl         Generated source corpus
-data/processed/reports/       Spark-written partitioned Parquet with gold labels
-data/processed/dashboard.parquet  Corpus with predicted annotations
-artifacts/                    Measured metrics, manifests, indices and trained models
-scala/CrimeAnalytics.scala    Supplementary executable Scala/Spark demonstration
-scripts/                      Setup, resource download, launch and verification
-tests/                        Unit, artifact integration and Streamlit interaction tests
-docs/                         Project report, syllabus map, demo guide and results
-Dockerfile / compose.yaml     Linux app and optional standalone Spark cluster
+```powershell
+.\.venv312\Scripts\python.exe scripts\import_jsonl.py examples.jsonl --source-url 'https://source.example/dataset' --license 'permission or license reference'
 ```
 
-## Optional Linux containers / Spark cluster
+This creates a separate ignored data/external directory with validated rows, rejection reasons and provenance. It does not automatically merge external text into the synthetic benchmark.
 
-These configurations are supplied for portability; Docker is not available on the build machine and this route has not been executed here.
+## Optional access gate and feedback
+
+Set CRIME_DASHBOARD_PASSWORD in the process environment before starting Streamlit to enable a shared password. This is not SSO or per-user authorization. Submitted text stays in session memory; saving a correction is explicit and stores a hash and categories locally. Redaction is heuristic and must be reviewed before sharing.
+
+## Optional Linux containers
+
+Docker configurations are supplied but were not executed on this machine.
 
 ```bash
 docker compose build dashboard
 docker compose run --rm dashboard python scripts/download_resources.py
-# Local-mode Linux pipeline:
 docker compose run --rm dashboard python run_pipeline.py
 docker compose up -d dashboard
-
-# Or use separate Spark master / worker containers:
 docker compose --profile cluster up -d spark-master spark-worker
 docker compose --profile cluster run --rm pipeline
 ```
 
-All containers mount the project at `/workspace`, so Spark executor file paths agree. For a genuine multi-host deployment, replace local files with shared/HDFS/object storage, provision dependencies on executors, and configure driver reachability. The Docker cluster still runs on one Docker host unless deployed elsewhere.
+Multi-host deployment requires shared storage, reachable driver networking and executor dependencies. HDFS, Kafka, cloud deployment and production identity management are future extensions.
+
+## Verification and report export
+
+```powershell
+.\.venv312\Scripts\python.exe -m pytest -q
+.\.venv312\Scripts\python.exe scripts\export_results.py
+```
+
+The export script renders REPORT.md plus actual artifact metrics into RESULTS.md and PROJECT_REPORT.html. Optional scripts/browser_check.py uses Playwright and installed Edge to check the running dashboard, capture screenshots and print the HTML to PROJECT_REPORT.pdf. Install Playwright separately if using that optional tool.
+
+To print an updated HTML report without repeating browser checks, run `python scripts/print_report.py` from an environment with Playwright and Edge.
+
+GitHub Actions runs correctness lint and lightweight unit tests. Full integration tests require generated models/data and run locally. See the measured appendix for the completed run.
 
 ## Troubleshooting
 
-* **`JAVA_GATEWAY_EXITED`:** use Java 17, not Java 25; check `JAVA_HOME`. Setup places Java in `.runtime/java17` and config discovers it automatically.
-* **Windows native Hadoop error:** check `HADOOP_HOME/bin` for compatible `winutils.exe` and `hadoop.dll`. Use the included Linux container alternative if needed.
-* **Missing BERT/VADER:** run `scripts/download_resources.py` once with internet access. Inference subsequently loads resources locally.
-* **Microsoft Store Python access error inside restricted tools:** run the launcher in a normal local terminal, or install Python 3.12 from python.org and recreate the venv.
-* **Port 8501 in use:** the dashboard may already be running. Open it or pass `--server.port 8502`.
-* **Dataset missing:** run the four pipeline stages before using the dashboard. It shows setup instructions until artifacts exist.
-* **BERT output differs across hardware:** seeds and stable Word2Vec hashing are fixed; floating-point kernels and dependency versions can still change results slightly.
-
-Primary documentation and research references are linked in `docs/REPORT.md`.
+- Use the project venv when a package is missing.
+- Check Java 17, JAVA_HOME and Windows Hadoop native libraries for Spark gateway failures.
+- Run download_resources.py if local model resources are missing.
+- Finish all stages if the dashboard shows setup instructions.
+- Open the existing dashboard or choose another port if 8501 is occupied.
+- Close and reopen PROJECT_REPORT.pdf in the IDE after regeneration.
+- Read the report's glossary and code map before editing model internals.

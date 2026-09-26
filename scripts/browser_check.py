@@ -19,7 +19,7 @@ def main():
         page.wait_for_timeout(2000)
         page.screenshot(path=str(screenshots / "overview.png"), full_page=True)
         visited.append("Overview")
-        for name, title, shot in [("Case explorer", "Explore the case library", "case-explorer.png"), ("Model evaluation", "Measure what the models learn", "evaluation.png"), ("Topics", "Discover recurring language", "topics.png")]:
+        for name, title, shot in [("Case explorer", "Explore the case library", "case-explorer.png"), ("Narrative lab", "Read between the lines", "narrative-lab.png"), ("Model evaluation", "Measure what the models learn", "evaluation.png"), ("Topics", "Discover recurring language", "topics.png"), ("Pipeline & syllabus", "A traceable research pipeline", "pipeline.png"), ("Learning guide", "Understand the entire project", "learning-guide.png")]:
             page.get_by_text(name, exact=True).click()
             page.get_by_role("heading", name=title, exact=True).wait_for(timeout=90000)
             page.wait_for_timeout(1500)

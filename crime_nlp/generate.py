@@ -1,7 +1,8 @@
 """Seeded fictional narratives with exact offsets, scenario splits and dirty rows.
 
 Names and locations are invented. Labels are generator ground truth, never features.
-Each crime has eight distinct action templates: six train, one validation, one test.
+Each crime has eight action phrasings and six layouts. Role grammar and names
+are independently varied with separate train, validation, development and test pools.
 """
 import json
 import random
@@ -11,6 +12,7 @@ from datetime import datetime, timedelta
 from string import Formatter
 
 from .config import RAW, ARTIFACTS, SEED, write_json
+from .corpus_patterns import VICTIM_PATTERNS, SUSPECT_PATTERNS, LOCATION_PATTERNS, LAYOUTS
 
 FIRST = "Ari Mira Dev Tara Nila Rohan Lena Kiran Soren Isha Ravi Elin Neel Anya Asha Milan Vera Arin Niko Zoya".split()
 LAST = "Vale Arden Rowan Sen Mehra Bose Quinn Hale Finch Sethi Noor Wren Shah Lane Ray Kapoor Moss Blake Frost Rao".split()
@@ -111,7 +113,8 @@ FRAMES = [
     "A statement from {victim}, the victim, placed the event at {location}. The witness described {suspect} as the suspect.",
     "The victim was identified as {victim} at {location}. The person alleged to be responsible was {suspect}.",
 ]
-ENTITY_FIELDS = {"suspect": "SUSPECT", "victim": "VICTIM", "location": "LOCATION", "weapon": "WEAPON"}
+ENTITY_FIELDS = {"suspect": "SUSPECT", "suspect2": "SUSPECT", "victim": "VICTIM", "victim2": "VICTIM",
+                 "location": "LOCATION", "weapon": "WEAPON", "item": "PROPERTY", "date": "DATE", "time": "TIME", "evidence": "EVIDENCE"}
 
 
 def render(template, values, start=0):
@@ -132,34 +135,42 @@ def render(template, values, start=0):
 def make_report(index, rng):
     category = list(ACTIONS)[index % len(ACTIONS)]
     variant = (index // len(ACTIONS)) % 8
-    split = "train" if variant < 6 else ("validation" if variant == 6 else "test")
-    suspect, victim = rng.sample([a + " " + b for a in FIRST for b in LAST], 2)
+    split = "train" if variant < 5 else {5: "validation", 6: "development", 7: "test"}[variant]
+    style = (index // 64) % len(LAYOUTS)
+    # First names are disjoint too: sequence models must use context, not memorization.
+    name_pool = {"train": FIRST[:14], "validation": FIRST[14:16], "development": FIRST[16:18], "test": FIRST[18:]}[split]
+    suspect, victim, suspect2, victim2 = rng.sample([a + " " + b for a in name_pool for b in LAST], 4)
     district = rng.choice(DISTRICTS)
-    values = {"suspect": suspect, "victim": victim, "location": f"{rng.choice(PLACES)}, {district}", "item": rng.choice(OBJECTS), "weapon": rng.choice(WEAPONS)}
+    values = {"suspect": suspect, "victim": victim, "suspect2": suspect2, "victim2": victim2, "location": f"{rng.choice(PLACES)}, {district}", "item": rng.choice(OBJECTS), "weapon": rng.choice(WEAPONS)}
     date = datetime(2023, 1, 1) + timedelta(days=rng.randrange(1096), minutes=rng.randrange(1440))
     # Narrative has no category label, risk label, template id, or train/test marker.
-    template = ACTIONS[category][variant] + " " + FRAMES[variant]
+    parts = {"event": ACTIONS[category][variant], "location": LOCATION_PATTERNS[style],
+             "victim": rng.choice(VICTIM_PATTERNS[split]), "suspect": rng.choice(SUSPECT_PATTERNS[split])}
+    if rng.random() < .10:
+        parts["suspect"] = "The suspect has not been identified."
+    elif rng.random() < .08:
+        parts["suspect"] += " A second alleged suspect was named as {suspect2}."
+    if rng.random() < .10:
+        parts["victim"] += " Another victim, {victim2}, also supplied a statement."
+    template = " ".join(parts[key] for key in LAYOUTS[style])
     if category in {"Assault", "Robbery"} and rng.random() < .8:
         template += " The witness described a {weapon} carried by the assailant."
     elif category == "Arson":
         values["weapon"] = "petrol can"
         template += " A {weapon} was recovered near the scene."
     elif rng.random() < .25:
-        template += " No weapon was reported."
-    template += f" The report was recorded on {date:%Y-%m-%d} at {date:%H:%M}. "
-    template += rng.choice([
-        "Officers preserved camera footage and interviewed two witnesses.",
-        "The responding team documented physical evidence and collected a written statement.",
-        "A witness supplied a partial description; the account remains unverified.",
-        "The case remains under investigation while nearby recordings are reviewed.",
-    ])
+        template += " No {weapon} was reported."
+    values.update(date=f"{date:%Y-%m-%d}", time=f"{date:%H:%M}", evidence=rng.choice(["camera footage", "written statement", "fingerprint samples", "photographs", "access logs"]))
+    template += " The report was recorded on {date} at {time}. Officers collected {evidence} for review."
+    if rng.random() < .15:
+        template += " The initial note contained an abbrev. and a misspelt descrption; a follow-up statement was requested."
     if rng.random() < .28:
         template += " A follow-up visit documented the condition of the scene. Investigators compared witness accounts and requested further recordings. The reporting person received a reference number and instructions for providing additional evidence. No conclusion about responsibility has been reached."
     text, entities = render(template, values)
     return {"report_id": f"SYN-{index:07d}", "narrative": text, "crime_type": category,
             "reported_at": date.isoformat(timespec="seconds"), "district": district,
-            "template_group": f"{category}-{variant}", "split": split,
-            "source": "synthetic-v1", "entities_json": json.dumps(entities)}
+            "template_group": f"{category}-{variant}-layout{style}", "split": split,
+            "source": "synthetic-v2", "entities_json": json.dumps(entities)}
 
 
 def generate(count=60000, seed=SEED, path=RAW):
@@ -188,10 +199,11 @@ def generate(count=60000, seed=SEED, path=RAW):
                 elif kind == "invalid_date":
                     row["reported_at"] = "invalid-date"
                 out.write(json.dumps(row) + "\n")
-    manifest = {"source": "synthetic-v1", "seed": seed, "valid_unique_reports": count,
+    manifest = {"source": "synthetic-v2", "seed": seed, "valid_unique_reports": count,
                 "raw_rows": count + sum(dirty_counts.values()), "injected_errors": dirty_counts,
-                "category_counts": dict(counts), "scenario_groups": 64,
-                "split_policy": "Per crime: templates 0-5 train, 6 validation, 7 test. No template group crosses a split.",
+                "category_counts": dict(counts), "scenario_groups": 384,
+                "diversity": "64 incident phrasings x 6 layouts = 384 composite groups; independently varied participant phrasing, unseen first names, unidentified/multiple suspects and multiple victims.",
+                "split_policy": "Per crime: incident variants 0-4 train, 5 validation, 6 development, 7 final test. Participant phrasing and first-name pools are also split. Layout grammar and vocabulary remain shared.",
                 "limitations": "Fictional template-generated data; metrics do not establish performance on real crime narratives."}
     write_json(ARTIFACTS / "dataset_manifest.json", manifest)
     print(f"Generated {manifest['raw_rows']:,} rows ({count:,} unique valid reports).", flush=True)

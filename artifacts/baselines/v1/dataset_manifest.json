@@ -1,0 +1,25 @@
+{
+  "source": "synthetic-v1",
+  "seed": 42,
+  "valid_unique_reports": 60000,
+  "raw_rows": 62700,
+  "injected_errors": {
+    "duplicates": 1500,
+    "null_text": 600,
+    "blank_text": 300,
+    "invalid_date": 300
+  },
+  "category_counts": {
+    "Burglary": 7500,
+    "Robbery": 7500,
+    "Theft": 7500,
+    "Assault": 7500,
+    "Fraud": 7500,
+    "Cybercrime": 7500,
+    "Vandalism": 7500,
+    "Arson": 7500
+  },
+  "scenario_groups": 64,
+  "split_policy": "Per crime: templates 0-5 train, 6 validation, 7 test. No template group crosses a split.",
+  "limitations": "Fictional template-generated data; metrics do not establish performance on real crime narratives."
+}

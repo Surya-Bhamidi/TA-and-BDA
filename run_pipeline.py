@@ -6,7 +6,7 @@ import time
 import traceback
 from datetime import datetime, timezone
 
-from crime_nlp.config import ARTIFACTS, ROOT, write_json
+from crime_nlp.config import ARTIFACTS, ROOT, SETTINGS, write_json
 
 
 def main():
@@ -14,10 +14,11 @@ def main():
     parser.add_argument("--stage", choices=["all", "generate", "spark", "train", "enrich"], default="all")
     parser.add_argument("--records", type=int, default=60000)
     parser.add_argument("--master", default="local[2]", help="Spark master URL; default two local Spark execution cores")
-    parser.add_argument("--train-limit", type=int, default=4800)
+    parser.add_argument("--train-limit", type=int, default=SETTINGS["training"]["train_limit"])
     parser.add_argument("--test-limit", type=int, default=1200)
     parser.add_argument("--validation-limit", type=int, default=800)
-    parser.add_argument("--bert-epochs", type=int, default=3)
+    parser.add_argument("--bert-epochs", type=int, default=SETTINGS["training"]["bert_epochs"])
+    parser.add_argument("--resume", action="store_true", help="Skip stages only when recorded input and output hashes still match")
     args = parser.parse_args()
     if args.records < 50000 and args.stage in {"all", "generate"}:
         parser.error("The full university project requires at least 50,000 valid reports.")
@@ -39,13 +40,20 @@ def main():
     status = {"started_at": datetime.now(timezone.utc).isoformat(), "arguments": vars(args), "python": platform.python_version(), "platform": platform.platform(), "stages": {}, "status": "running"}
     status_path = ARTIFACTS / f"run_{args.stage}.json"
     started = time.perf_counter()
+    from crime_nlp.audit import stage_signature, stage_outputs, record_stage, reusable_stage
     try:
         for name in selected:
             print(f"\n>>> Stage: {name}", flush=True)
             stage_start = time.perf_counter()
+            signature = stage_signature(name, vars(args))
+            if args.resume and reusable_stage(name, signature):
+                status["stages"][name] = {"status": "reused", "reason": "input and output hashes match"}
+                print(f"Reused unchanged stage {name}", flush=True)
+                continue
             status["stages"][name] = {"status": "running"}
             write_json(status_path, status)
             stages[name]()
+            record_stage(name, signature, stage_outputs(name))
             status["stages"][name] = {"status": "complete", "seconds": round(time.perf_counter() - stage_start, 2)}
             write_json(status_path, status)
         status["status"] = "complete"
@@ -59,6 +67,8 @@ def main():
     finally:
         status["seconds"] = round(time.perf_counter() - started, 2)
         write_json(status_path, status)
+        history_path = ARTIFACTS / "runs" / (datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f") + f"-{args.stage}.json")
+        write_json(history_path, status)
     print(f"\nCompleted in {status['seconds']:.1f}s. Launch: python -m streamlit run app.py", flush=True)
 
 

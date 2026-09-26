@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from scipy import sparse
 
-from crime_nlp.config import ARTIFACTS, PROCESSED, CATEGORIES
+from crime_nlp.config import ARTIFACTS, PROCESSED, CATEGORIES, ENTITY_LABELS
 
 pytestmark = pytest.mark.skipif(not (PROCESSED / "dashboard.parquet").exists(), reason="Run the pipeline before artifact integration tests.")
 
@@ -32,7 +32,7 @@ def test_complete_corpus_cleaning_and_search_alignment(data):
 def test_split_has_no_template_or_duplicate_leakage(data):
     assert data.groupby("template_group", observed=True).split.nunique().max() == 1
     assert data.groupby("text_hash", observed=True).split.nunique().max() == 1
-    for split in ["train", "validation", "test"]:
+    for split in ["train", "validation", "development", "test"]:
         assert set(data.loc[data.split == split, "crime_type"]) == set(CATEGORIES)
 
 
@@ -44,7 +44,7 @@ def test_predictions_and_spans_are_valid(data):
     for row in data.sample(300, random_state=42).itertuples():
         for ent in json.loads(row.predicted_entities_json):
             assert row.narrative[ent["start"]:ent["end"]] == ent["text"]
-            assert ent["label"] in {"SUSPECT", "VICTIM", "LOCATION", "WEAPON"}
+            assert ent["label"] in ENTITY_LABELS
 
 
 def test_metrics_are_consistent_with_test_count():
@@ -66,3 +66,26 @@ def test_offline_inference_has_syntax_and_bert(data):
     assert any(t["morphology"] for t in result["tokens"])
     assert result["entities"]
     assert result["summary"]
+
+
+def test_case_store_and_semantic_index_preserve_report_order(data):
+    import numpy as np
+    from crime_nlp.store import fetch_reports, entity_matches
+    positions = [len(data) - 1, 0, 19]
+    fetched = fetch_reports(positions)
+    assert fetched.report_id.tolist() == data.iloc[positions].report_id.tolist()
+    assert np.load(ARTIFACTS / "semantic_embeddings.npy", mmap_mode="r").shape == (len(data), 384)
+    assert entity_matches("Any", "' OR 1=1 --") == []
+
+
+def test_both_entity_models_and_grounded_evidence_on_development(data):
+    from crime_nlp.inference import analyze
+    from crime_nlp.semantic import semantic_evidence
+    text = data.loc[data.split == "development"].iloc[0].narrative
+    for name in ("CRF", "BERT"):
+        result = analyze(text, ner_choice=name)
+        assert result["ner_model"] == name
+        assert result["entities"]
+        assert all(text[e["start"]:e["end"]] == e["text"] for e in result["entities"])
+    answer = semantic_evidence("What evidence was reviewed?", text, "development-fixture")
+    assert all(c["text"] in text and c["report_id"] == "development-fixture" for c in answer["citations"])

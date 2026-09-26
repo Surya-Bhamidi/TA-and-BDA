@@ -1,0 +1,26 @@
+# Change these values before a new run. CLI flags override the training sizes.
+[project]
+version = "2.0.0"
+seed = 42
+
+[training]
+train_limit = 6400
+validation_limit = 800
+test_limit = 1200
+bert_epochs = 4
+ner_train_limit = 3200
+ner_epochs = 5
+
+[inference]
+confidence_threshold = 0.60
+max_characters = 30000
+semantic_weight = 0.65
+
+[spark]
+partitions = 8
+driver_memory = "2g"
+
+[privacy]
+# The demo is local-only by default. Optional password protection uses
+# CRIME_DASHBOARD_PASSWORD, never a password committed in this file.
+record_feedback = true

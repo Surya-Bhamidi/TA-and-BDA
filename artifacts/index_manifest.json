@@ -1,0 +1,9 @@
+{
+  "rows": 60000,
+  "report_order_sha256": "c1ac270035ea355a1593a2196d4ba5723017c62aae1c87b4f69c92f88a466b5d",
+  "semantic_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "dimensions": 384,
+  "max_subword_tokens": 128,
+  "storage": "float16, normalized vectors",
+  "ner_model": "CRF"
+}

@@ -1,66 +1,261 @@
 {
-    "model":  "Linear-chain CRF with sentence-context observations (BIO)",
-    "train_rows":  2400,
-    "validation_rows":  600,
-    "test_rows":  600,
-    "strict_entity_f1":  0.8235294117647058,
-    "report":  {
-                   "LOCATION":  {
-                                    "precision":  1.0,
-                                    "recall":  1.0,
-                                    "f1-score":  1.0,
-                                    "support":  600
-                                },
-                   "SUSPECT":  {
-                                   "precision":  1.0,
-                                   "recall":  1.0,
-                                   "f1-score":  1.0,
-                                   "support":  600
-                               },
-                   "VICTIM":  {
-                                  "precision":  0.0,
-                                  "recall":  0.0,
-                                  "f1-score":  0.0,
-                                  "support":  600
-                              },
-                   "WEAPON":  {
-                                  "precision":  1.0,
-                                  "recall":  1.0,
-                                  "f1-score":  1.0,
-                                  "support":  200
-                              },
-                   "micro avg":  {
-                                     "precision":  1.0,
-                                     "recall":  0.7,
-                                     "f1-score":  0.8235294117647058,
-                                     "support":  2000
-                                 },
-                   "macro avg":  {
-                                     "precision":  0.75,
-                                     "recall":  0.75,
-                                     "f1-score":  0.75,
-                                     "support":  2000
-                                 },
-                   "weighted avg":  {
-                                        "precision":  0.7,
-                                        "recall":  0.7,
-                                        "f1-score":  0.7,
-                                        "support":  2000
-                                    }
-               },
-    "labels":  [
-                   "SUSPECT",
-                   "VICTIM",
-                   "LOCATION",
-                   "WEAPON"
-               ],
-    "offset_source":  "generator offsets on original narrative",
-    "split":  "held-out templates; revised after initial error analysis; development evaluation",
-    "ablation":  {
-                     "initial_validation_f1":  0.6981891348088531,
-                     "context_validation_f1":  1.0,
-                     "selected_by_validation":  true,
-                     "initial_test_f1":  0.4000000000000001,
-                     "disclosure":  "Initial test role errors informed feature development; the revised test score is not an untouched final benchmark."
-                 }
+  "strict_entity_f1": 0.9845852703694642,
+  "report": {
+    "DATE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 600
+    },
+    "EVIDENCE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 600
+    },
+    "LOCATION": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 600
+    },
+    "PROPERTY": {
+      "precision": 1.0,
+      "recall": 0.44,
+      "f1-score": 0.6111111111111112,
+      "support": 225
+    },
+    "SUSPECT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 577
+    },
+    "TIME": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 600
+    },
+    "VICTIM": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 667
+    },
+    "WEAPON": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 281
+    },
+    "micro avg": {
+      "precision": 1.0,
+      "recall": 0.9696385542168675,
+      "f1-score": 0.9845852703694642,
+      "support": 4150
+    },
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 0.9299999999999999,
+      "f1-score": 0.9513888888888888,
+      "support": 4150
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 0.9696385542168675,
+      "f1-score": 0.9789156626506024,
+      "support": 4150
+    }
+  },
+  "model": "CRF",
+  "labels": [
+    "SUSPECT",
+    "VICTIM",
+    "LOCATION",
+    "WEAPON",
+    "PROPERTY",
+    "DATE",
+    "TIME",
+    "EVIDENCE"
+  ],
+  "train_rows": 3200,
+  "validation_rows": 400,
+  "test_rows": 600,
+  "models": {
+    "CRF": {
+      "strict_entity_f1": 0.9845852703694642,
+      "report": {
+        "DATE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 600
+        },
+        "EVIDENCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 600
+        },
+        "LOCATION": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 600
+        },
+        "PROPERTY": {
+          "precision": 1.0,
+          "recall": 0.44,
+          "f1-score": 0.6111111111111112,
+          "support": 225
+        },
+        "SUSPECT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 577
+        },
+        "TIME": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 600
+        },
+        "VICTIM": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 667
+        },
+        "WEAPON": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 281
+        },
+        "micro avg": {
+          "precision": 1.0,
+          "recall": 0.9696385542168675,
+          "f1-score": 0.9845852703694642,
+          "support": 4150
+        },
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 0.9299999999999999,
+          "f1-score": 0.9513888888888888,
+          "support": 4150
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 0.9696385542168675,
+          "f1-score": 0.9789156626506024,
+          "support": 4150
+        }
+      }
+    },
+    "BERT": {
+      "strict_entity_f1": 0.8740911713791113,
+      "report": {
+        "DATE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 600
+        },
+        "EVIDENCE": {
+          "precision": 0.9900990099009901,
+          "recall": 1.0,
+          "f1-score": 0.9950248756218906,
+          "support": 600
+        },
+        "LOCATION": {
+          "precision": 0.7802340702210663,
+          "recall": 1.0,
+          "f1-score": 0.8765522279035792,
+          "support": 600
+        },
+        "PROPERTY": {
+          "precision": 0.8064516129032258,
+          "recall": 1.0,
+          "f1-score": 0.8928571428571428,
+          "support": 225
+        },
+        "SUSPECT": {
+          "precision": 0.7015177065767285,
+          "recall": 0.7209705372616985,
+          "f1-score": 0.7111111111111111,
+          "support": 577
+        },
+        "TIME": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 600
+        },
+        "VICTIM": {
+          "precision": 0.5916030534351145,
+          "recall": 0.697151424287856,
+          "f1-score": 0.6400550584996559,
+          "support": 667
+        },
+        "WEAPON": {
+          "precision": 0.9964539007092199,
+          "recall": 1.0,
+          "f1-score": 0.9982238010657194,
+          "support": 281
+        },
+        "micro avg": {
+          "precision": 0.8387596899224806,
+          "recall": 0.9125301204819277,
+          "f1-score": 0.8740911713791113,
+          "support": 4150
+        },
+        "macro avg": {
+          "precision": 0.8582949192182932,
+          "recall": 0.9272652451936944,
+          "f1-score": 0.8892280271323874,
+          "support": 4150
+        },
+        "weighted avg": {
+          "precision": 0.8489228820269262,
+          "recall": 0.9125301204819277,
+          "f1-score": 0.8774862271055393,
+          "support": 4150
+        }
+      }
+    }
+  },
+  "validation": {
+    "CRF": 1.0,
+    "BERT": 0.9414438035308512
+  },
+  "bert_history": [
+    {
+      "epoch": 1,
+      "loss": 0.31045802333392203,
+      "validation_entity_f1": 0.8086642599277979
+    },
+    {
+      "epoch": 2,
+      "loss": 0.015680015416364768,
+      "validation_entity_f1": 0.9215207534007673
+    },
+    {
+      "epoch": 3,
+      "loss": 0.006677092799691309,
+      "validation_entity_f1": 0.9225425494963528
+    },
+    {
+      "epoch": 4,
+      "loss": 0.004275355678601045,
+      "validation_entity_f1": 0.9044143204727146
+    },
+    {
+      "epoch": 5,
+      "loss": 0.0030698502284849383,
+      "validation_entity_f1": 0.9414438035308512
+    }
+  ],
+  "split": "V2 final held-out incident and participant patterns; models fixed before scoring"
 }

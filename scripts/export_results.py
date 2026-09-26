@@ -22,11 +22,11 @@ def main():
              f"* Invalid rows removed: **{spark['invalid_rows_removed']:,}**", f"* Duplicates removed: **{spark['duplicates_removed']:,}**",
              f"* Spark: **{spark['spark_version']}**, master **{spark['master']}**, **{spark['input_partitions']}** input partitions",
              f"* Enriched narratives: **{enriched['rows']:,}**", "", "## Same-split model comparison", "",
-             f"Train / validation / test: {evaluation['protocol']['train_rows']:,} / {evaluation['protocol']['validation_rows']:,} / {evaluation['protocol']['test_rows']:,}.", "",
+             f"Train / validation / development / final test: {evaluation['protocol']['train_rows']:,} / {evaluation['protocol']['validation_rows']:,} / {evaluation['protocol']['development_rows']:,} / {evaluation['protocol']['test_rows']:,}.", "",
              "| Model | Accuracy | Macro F1 | Weighted F1 |", "|---|---:|---:|---:|"]
     for name, result in evaluation["models"].items():
         lines.append(f"| {name} | {result['accuracy']:.4f} | {result['macro_f1']:.4f} | {result['weighted_f1']:.4f} |")
-    lines += ["", "## Entity extraction", "", f"Revised CRF strict entity F1: **{ner['strict_entity_f1']:.4f}** on {ner['test_rows']} narratives.", "",
+    lines += ["", "## Entity extraction", "", f"Validation-selected {ner['model']} strict entity F1: **{ner['strict_entity_f1']:.4f}** on {ner['test_rows']} final-test narratives.", "",
               "| Entity | Precision | Recall | F1 |", "|---|---:|---:|---:|"]
     for label in ner["labels"]:
         result = ner["report"][label]
@@ -34,9 +34,9 @@ def main():
     if "ablation" in ner:
         a = ner["ablation"]
         lines += ["", f"Original CRF test F1: {a['initial_test_f1']:.4f}. Validation F1 changed from {a['initial_validation_f1']:.4f} to {a['context_validation_f1']:.4f} after adding sentence-level observations.", "", a["disclosure"]]
-    weak = [label for label in ner["labels"] if ner["report"][label]["f1-score"] < .5]
+    weak = [label for label in ner["labels"] if ner["report"][label]["recall"] < .8]
     if weak:
-        lines += ["", "**Material limitation:** held-out extraction remains weak for " + ", ".join(weak) + ". Review predicted roles against the original text; model completeness is not evidence of reliable real-world extraction."]
+        lines += ["", "**Material limitation:** held-out recall is below 80% for " + ", ".join(weak) + ". The overall entity F1 is dominated by more frequent types; consult each row above. Review predicted roles against the original text."]
     lines += ["", "## Distributed baseline and topics", "",
               f"MLlib accuracy: **{spark['mllib']['accuracy']:.4f}**; weighted F1: **{spark['mllib']['weighted_f1']:.4f}**. It uses {spark['mllib']['train_rows']:,} training and {spark['mllib']['test_rows']:,} test rows, so sample sizes differ from the four-model comparison.", "",
               f"LDA held-out perplexity: **{topics['held_out_perplexity']:.2f}**; top-term diversity: **{topics['topic_diversity']:.3f}**.", "", "## Verification", ""]
@@ -55,16 +55,31 @@ def main():
     if browser.exists():
         result = read("browser_check.json")
         lines.append(f"\nBrowser smoke check: **{result['status']}**. Pages visited: {', '.join(result['pages'])}.")
-    lines += ["", "## Interpretation", "", "The corpus is synthetic. Scenario groups are separated, but vocabulary and generator conventions are shared. Revised CRF test results are development evaluation. No human-reference accuracy is claimed for syntax, sentiment, threat heuristics or summarization. Spark ran locally; Docker/multi-host deployment was not exercised.", "",
+    lines += ["", "## Classification uncertainty and calibration", "", "| Model | 95% accuracy interval |", "|---|---|"]
+    for name, result in evaluation["models"].items():
+        low, high = result["accuracy_ci95"]
+        lines.append(f"| {name} | {low:.4f} to {high:.4f} |")
+    lines += ["", "Intervals use 400 report-level bootstrap resamples and do not cover new-source uncertainty.", "",
+              f"Training-only grouped TF-IDF CV mean macro-F1: **{evaluation['grouped_cv']['mean']:.4f}**.", "",
+              "| TF-IDF final-test calibration | ECE | Log loss | Coverage at 0.60 | Accepted accuracy |", "|---|---:|---:|---:|---:|"]
+    for name in ("before", "after"):
+        item = evaluation["calibration_test"][name]
+        accepted = f"{item['accuracy_when_accepted']:.4f}" if item["accuracy_when_accepted"] is not None else "not applicable"
+        lines.append(f"| {name} | {item['ece']:.4f} | {item['log_loss']:.4f} | {item['coverage']:.4f} | {accepted} |")
+    lines += ["", "Temperature is fitted on validation only. Calibration is not guaranteed to improve under a shifted test distribution.", "",
+              "## Both entity models", "", "| Model | Validation strict F1 | Final-test strict F1 |", "|---|---:|---:|"]
+    for name, result in ner["models"].items():
+        lines.append(f"| {name} | {ner['validation'][name]:.4f} | {result['strict_entity_f1']:.4f} |")
+    lines += ["", "## Interpretation", "", "The corpus is synthetic. Scenario groups are separated, but vocabulary and generator conventions are shared. V2 model hashes were frozen before final predictions. No human-reference accuracy is claimed for syntax, sentiment, threat heuristics, search or summarization. Spark ran with a standalone master and two workers on one physical host; Docker and multi-host deployment were not exercised. V1 and V2 scores use different corpora and protocols.", "",
               "Resources: `artifacts/evaluation.json`, `ner_evaluation.json`, `spark_metrics.json`, `topics.json`, split ID CSVs, and `logs/`."]
     markdown = "\n".join(lines) + "\n"
     (ROOT / "docs" / "RESULTS.md").write_text(markdown, encoding="utf-8")
     parser = MarkdownIt("commonmark", {"html": False}).enable("table")
     source = (ROOT / "docs" / "REPORT.md").read_text(encoding="utf-8")
     body = parser.render(source) + '<div class="new-page"></div>' + parser.render(markdown)
-    style = "body{font:14px/1.65 Arial,sans-serif;color:#203245;max-width:900px;margin:45px auto;padding:0 30px}h1{font-size:30px;color:#0c655f;line-height:1.3}h2{font-size:20px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:12px}td,th{border:1px solid #d7e1e6;padding:8px;text-align:left}th{background:#edf4f3}code{font-size:12px;background:#f0f3f5;padding:2px 4px}a{color:#126b78}p,li{orphans:3;widows:3}h1,h2,h3{break-after:avoid}@media print{body{margin:0;max-width:none;font-size:11px}.new-page{break-before:page}h1{font-size:25px}h2{font-size:17px}a{color:inherit}table{break-inside:avoid}}"
+    style = "body{font:14px/1.65 Arial,sans-serif;color:#203245;max-width:900px;margin:45px auto;padding:0 30px}h1{font-size:30px;color:#0c655f;line-height:1.3}h2{font-size:20px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:12px}td,th{border:1px solid #d7e1e6;padding:8px;text-align:left}th{background:#edf4f3}code{font-size:12px;background:#f0f3f5;padding:2px 4px}a{color:#126b78}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f3f5;padding:12px}td,code{overflow-wrap:anywhere}p,li{orphans:3;widows:3}h1,h2,h3{break-after:avoid}@media print{body{margin:0;max-width:none;font-size:11px}.new-page{break-before:page}h1{font-size:25px}h2{font-size:17px}a{color:inherit}table{break-inside:avoid}}"
     (ROOT / "docs" / "PROJECT_REPORT.html").write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Decoding Crime Narratives — Project Report</title><style>' + style + '</style></head><body>' + body + '</body></html>', encoding="utf-8")
-    write_json(ARTIFACTS / "delivery_manifest.json", {"generated_at": datetime.now(timezone.utc).isoformat(), "project": "Decoding Crime Narratives using NLP and Big Data Analytics", "reports": spark["clean_rows"], "spark_master": spark["master"], "models": list(evaluation["models"]), "crf_development_evaluation": True, "docker_executed": False})
+    write_json(ARTIFACTS / "delivery_manifest.json", {"generated_at": datetime.now(timezone.utc).isoformat(), "version": "2.0.0", "project": "Decoding Crime Narratives using NLP and Big Data Analytics", "reports": spark["clean_rows"], "spark_master": spark["master"], "models": list(evaluation["models"]), "final_models_frozen": True, "docker_executed": False})
     print("Created docs/RESULTS.md and docs/PROJECT_REPORT.html from executed artifacts.")
 
 

@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,9 +10,13 @@ DATA = ROOT / "data"
 RAW = DATA / "raw" / "reports.jsonl"
 PROCESSED = DATA / "processed"
 ARTIFACTS = ROOT / "artifacts"
-MODELS = ARTIFACTS / "models"
+MODELS = ARTIFACTS / "models" / "v2"
 RUNTIME = ROOT / ".runtime"
 SEED = 42
+with (ROOT / "settings.toml").open("rb") as settings_file:
+    SETTINGS = tomllib.load(settings_file)
+SEED = int(SETTINGS["project"]["seed"])
+ENTITY_LABELS = ["SUSPECT", "VICTIM", "LOCATION", "WEAPON", "PROPERTY", "DATE", "TIME", "EVIDENCE"]
 BERT_ID = "google/bert_uncased_L-2_H-128_A-2"
 CATEGORIES = ["Arson", "Assault", "Burglary", "Cybercrime", "Fraud", "Robbery", "Theft", "Vandalism"]
 

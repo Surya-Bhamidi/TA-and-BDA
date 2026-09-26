@@ -4,14 +4,14 @@ import os
 import socket
 from pathlib import Path
 
-from .config import RAW, PROCESSED, ARTIFACTS, ROOT, SEED, write_json
+from .config import RAW, PROCESSED, ARTIFACTS, SETTINGS, write_json
 
 
 def create_spark(master="local[2]"):
     from pyspark.sql import SparkSession
     builder = (SparkSession.builder.master(master).appName("DecodingCrimeNarratives")
-               .config("spark.sql.shuffle.partitions", "8")
-               .config("spark.driver.memory", "2g")
+               .config("spark.sql.shuffle.partitions", str(SETTINGS["spark"]["partitions"]))
+               .config("spark.driver.memory", SETTINGS["spark"]["driver_memory"])
                .config("spark.sql.session.timeZone", "UTC")
                .config("spark.sql.ansi.enabled", "false")
                .config("spark.sql.legacy.timeParserPolicy", "CORRECTED")
@@ -35,7 +35,7 @@ def clean_frame(raw):
     valid = raw.dropna(subset=required).filter(F.length(F.trim(F.col("narrative"))) > 0)
     valid = valid.withColumn("event_time", F.to_timestamp("reported_at"))
     valid = valid.filter(F.col("event_time").isNotNull() & F.col("crime_type").isin(CATEGORIES)
-                         & F.col("split").isin("train", "validation", "test"))
+                         & F.col("split").isin("train", "validation", "development", "test"))
     # Keep original text unchanged: NER offsets refer to it. Clean text is a second column.
     valid = valid.withColumn("clean_text", F.trim(F.regexp_replace(F.lower("narrative"), r"[^\p{L}\p{N}\s]", " ")))
     valid = valid.withColumn("clean_text", F.trim(F.regexp_replace("clean_text", r"\s+", " ")))
@@ -59,12 +59,13 @@ def run_spark(master="local[2]", raw_path=RAW):
     spark = create_spark(master)
     try:
         schema = StructType([StructField(k, StringType(), True) for k in ["report_id", "narrative", "crime_type", "reported_at", "district", "template_group", "split", "source", "entities_json"]])
-        raw = spark.read.schema(schema).json(str(Path(raw_path).resolve())).repartition(8).cache()
+        raw = spark.read.schema(schema).json(str(Path(raw_path).resolve())).repartition(SETTINGS["spark"]["partitions"]).cache()
         raw_count = raw.count()
         valid, clean = clean_frame(raw)
         valid_count = valid.count()
         clean = clean.cache()
         clean_count = clean.count()
+        (ARTIFACTS / "spark_execution_plan.txt").write_text(clean._jdf.queryExecution().executedPlan().toString(), encoding="utf-8")
         clean.write.mode("overwrite").partitionBy("split").parquet(str(PROCESSED / "reports"))
         clean.createOrReplaceTempView("crime_reports")
         spark.sql("SELECT month, crime_type, district, count(*) AS reports FROM crime_reports GROUP BY month, crime_type, district ORDER BY month, crime_type, district").toPandas().to_parquet(PROCESSED / "trends.parquet", index=False)
@@ -85,8 +86,17 @@ def run_spark(master="local[2]", raw_path=RAW):
                   "duplicates_removed": valid_count - clean_count, "clean_rows": clean_count,
                   "storage": "Spark-written Parquet partitioned by split", "runtime_seconds": round(time.perf_counter() - started, 2),
                   "mllib": {"model": "HashingTF + IDF + multinomial logistic regression", "train_rows": clean.filter("split = 'train'").count(), "test_rows": predictions.count(), "accuracy": metrics["accuracy"], "weighted_f1": metrics["f1"]},
-                  "deployment_note": "local[2] executes Spark tasks on two local cores; this run is not a multi-machine cluster."}
+                  "deployment_note": "Spark local task execution on one machine." if master.startswith("local") else "Standalone Spark master and worker processes; see cluster_execution.json for verified workers and host scope."}
         write_json(ARTIFACTS / "spark_metrics.json", report)
+        quality = {"raw_rows": raw_count, "clean_rows": clean_count, "invalid_removed": raw_count - valid_count, "duplicates_removed": valid_count - clean_count,
+                   "null_narratives": raw.filter(F.col("narrative").isNull()).count(),
+                   "blank_narratives": raw.filter(F.length(F.regexp_replace("narrative", r"\s", "")) == 0).count(),
+                   "schema": clean.schema.simpleString(),
+                   "length_quantiles": clean.select(F.length("narrative").alias("n")).approxQuantile("n", [.0, .25, .5, .75, 1.], .01),
+                   "split_counts": {r["split"]: r["count"] for r in clean.groupBy("split").count().collect()},
+                   "category_counts": {r["crime_type"]: r["count"] for r in clean.groupBy("crime_type").count().collect()},
+                   "lineage": "report_id + source + SHA-256 normalized text hash retained from raw JSONL through Parquet and dashboard"}
+        write_json(ARTIFACTS / "data_quality.json", quality)
         print(f"Spark cleaned {clean_count:,} reports; held-out MLlib accuracy={metrics['accuracy']:.4f}", flush=True)
         return report
     finally:
