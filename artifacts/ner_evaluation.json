@@ -1,0 +1,66 @@
+{
+    "model":  "Linear-chain CRF with sentence-context observations (BIO)",
+    "train_rows":  2400,
+    "validation_rows":  600,
+    "test_rows":  600,
+    "strict_entity_f1":  0.8235294117647058,
+    "report":  {
+                   "LOCATION":  {
+                                    "precision":  1.0,
+                                    "recall":  1.0,
+                                    "f1-score":  1.0,
+                                    "support":  600
+                                },
+                   "SUSPECT":  {
+                                   "precision":  1.0,
+                                   "recall":  1.0,
+                                   "f1-score":  1.0,
+                                   "support":  600
+                               },
+                   "VICTIM":  {
+                                  "precision":  0.0,
+                                  "recall":  0.0,
+                                  "f1-score":  0.0,
+                                  "support":  600
+                              },
+                   "WEAPON":  {
+                                  "precision":  1.0,
+                                  "recall":  1.0,
+                                  "f1-score":  1.0,
+                                  "support":  200
+                              },
+                   "micro avg":  {
+                                     "precision":  1.0,
+                                     "recall":  0.7,
+                                     "f1-score":  0.8235294117647058,
+                                     "support":  2000
+                                 },
+                   "macro avg":  {
+                                     "precision":  0.75,
+                                     "recall":  0.75,
+                                     "f1-score":  0.75,
+                                     "support":  2000
+                                 },
+                   "weighted avg":  {
+                                        "precision":  0.7,
+                                        "recall":  0.7,
+                                        "f1-score":  0.7,
+                                        "support":  2000
+                                    }
+               },
+    "labels":  [
+                   "SUSPECT",
+                   "VICTIM",
+                   "LOCATION",
+                   "WEAPON"
+               ],
+    "offset_source":  "generator offsets on original narrative",
+    "split":  "held-out templates; revised after initial error analysis; development evaluation",
+    "ablation":  {
+                     "initial_validation_f1":  0.6981891348088531,
+                     "context_validation_f1":  1.0,
+                     "selected_by_validation":  true,
+                     "initial_test_f1":  0.4000000000000001,
+                     "disclosure":  "Initial test role errors informed feature development; the revised test score is not an untouched final benchmark."
+                 }
+}

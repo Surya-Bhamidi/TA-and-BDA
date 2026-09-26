@@ -1,0 +1,7 @@
+{
+    "initial_validation_f1":  0.6981891348088531,
+    "context_validation_f1":  1.0,
+    "selected_by_validation":  true,
+    "initial_test_f1":  0.4000000000000001,
+    "disclosure":  "Initial test role errors informed feature development; the revised test score is not an untouched final benchmark."
+}

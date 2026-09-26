@@ -1,0 +1,28 @@
+services:
+  dashboard:
+    build: .
+    image: crime-narratives:local
+    ports: ["127.0.0.1:8501:8501"]
+    volumes: [".:/workspace"]
+  spark-master:
+    image: crime-narratives:local
+    profiles: ["cluster"]
+    hostname: spark-master
+    command: ["/usr/local/lib/python3.12/site-packages/pyspark/bin/spark-class", "org.apache.spark.deploy.master.Master", "--host", "spark-master", "--port", "7077", "--webui-port", "8080"]
+    ports: ["127.0.0.1:8080:8080"]
+    volumes: [".:/workspace"]
+  spark-worker:
+    image: crime-narratives:local
+    profiles: ["cluster"]
+    depends_on: [spark-master]
+    command: ["/usr/local/lib/python3.12/site-packages/pyspark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077", "--cores", "2", "--memory", "2g"]
+    volumes: [".:/workspace"]
+  pipeline:
+    image: crime-narratives:local
+    profiles: ["cluster"]
+    hostname: pipeline
+    depends_on: [spark-worker]
+    environment:
+      SPARK_DRIVER_HOST: pipeline
+    command: ["python", "run_pipeline.py", "--master", "spark://spark-master:7077"]
+    volumes: [".:/workspace"]
