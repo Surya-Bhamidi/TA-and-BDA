@@ -1,14 +1,14 @@
 # Change these values before a new run. CLI flags override the training sizes.
 [project]
-version = "2.0.0"
+version = "3.1.0"
 seed = 42
 
 [training]
-train_limit = 6400
+train_limit = 12000
 validation_limit = 800
 test_limit = 1200
 bert_epochs = 4
-ner_train_limit = 3200
+ner_train_limit = 8000
 ner_epochs = 5
 
 [inference]

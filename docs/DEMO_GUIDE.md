@@ -1,8 +1,8 @@
-# Beginner demonstration guide — Version 2
+# Beginner demonstration guide — Version 3
 
 ## Before presenting
 
-Run START_DASHBOARD.cmd in the completed workspace and open http://localhost:8501. A fresh clone requires the setup and full pipeline commands in README.md first. Keep docs/PROJECT_REPORT.pdf and docs/RESULTS.md available.
+Run START_DASHBOARD.cmd in the completed workspace and open http://localhost:8502. A fresh clone requires the setup and full pipeline commands in README.md first. Keep docs/PROJECT_REPORT.pdf and docs/RESULTS.md available.
 
 ## A ten-minute walkthrough
 
@@ -15,6 +15,8 @@ Run START_DASHBOARD.cmd in the completed workspace and open http://localhost:850
 7. **Conclusion (one minute):** Open Learning guide and point to the full report. Name the real-data validation and multi-machine benchmark still needed.
 
 ## A pasteable fictional example
+
+For informal English, first try `sir my moblie stoln from pocket in bus ystrday`. For unfamiliar names and active/passive roles, compare `rajiv hit sneha with a stick near pune` with `sneha was beaten by rajiv near pune`. Review the highlights against the unchanged source. The fixed development comparisons, including failures, are in `artifacts/robustness_development.json`.
 
 On 2025-03-18 at 21:15, Alex Lee reported a stolen phone near Cedar Market. A witness identified Morgan Reed as a suspect. No knife was reported. Officers reviewed camera footage. The account remains an allegation pending review.
 

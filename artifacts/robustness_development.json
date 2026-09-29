@@ -1,0 +1,1129 @@
+{
+  "scope": "Fixed hand-written development/regression examples; not an independent real-world benchmark.",
+  "v2": {
+    "category_model": "TF-IDF",
+    "entity_model": "CRF",
+    "classification_accuracy": 0.71875,
+    "cases": [
+      {
+        "text": "sir my moblie stoln from pocket in bus ystrday",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "someone took my bag when i was buying ticket",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "my bicycle gone from outside cafe no one saw",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "someone quietly removed my wallet in the crowd",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "two fellows showed knife and took my phone near bus stand",
+        "expected": "Robbery",
+        "prediction": "Theft",
+        "correct": false
+      },
+      {
+        "text": "he said give cash or i stab you so i gave cash",
+        "expected": "Robbery",
+        "prediction": "Fraud",
+        "correct": false
+      },
+      {
+        "text": "they pushed me down snatched gold chain and ran",
+        "expected": "Robbery",
+        "prediction": "Assault",
+        "correct": false
+      },
+      {
+        "text": "gun point they took all money from me",
+        "expected": "Robbery",
+        "prediction": "Theft",
+        "correct": false
+      },
+      {
+        "text": "went out came home door lock brokn laptop missing inside",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "someone entered our locked shop by breaking shutter and stole cash",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "thieves climbed through window into flat and took jewellery",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "house break in happened last nite things taken from cupboard",
+        "expected": "Burglary",
+        "prediction": "Theft",
+        "correct": false
+      },
+      {
+        "text": "he beating me with rod i got hurt on head",
+        "expected": "Assault",
+        "prediction": "Vandalism",
+        "correct": false
+      },
+      {
+        "text": "José García hit Wei Zhang with iron rod near Nairobi",
+        "expected": "Assault",
+        "prediction": "Vandalism",
+        "correct": false
+      },
+      {
+        "text": "fatima was punched by rajesh outside office",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "one fellow slaped me then kickd me nothing stolen",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "paid advance for phone seller disapeared no delivery and blocked my number",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "sir job promise they collected 5000 rupees now fake company",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "someone pretending bank staff made me transfer money",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "fake investment double money promise all savings gone",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "my acount hackd pasword changed unable login",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "clicked email link now all files locked asking bitcoin",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "someone using my email after stealing password",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "fake login site took otp and accessed my account",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "someone scrached car and broke mirrors purposely",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "they painted bad words on wall and smashed public bench",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "parked bike tyres punctured by person intentionally",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "bus stop glass broken deliberately nothing stolen",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "he put petrol on my shop and lit match full shop burning",
+        "expected": "Arson",
+        "prediction": "Burglary",
+        "correct": false
+      },
+      {
+        "text": "someone purposely set our scooter on fire",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "poured kerosene then burned the shed intentionally",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "our warehouse torched by someone last night",
+        "expected": "Arson",
+        "prediction": "Theft",
+        "correct": false
+      }
+    ],
+    "exact_role_cases": 0,
+    "role_cases": [
+      {
+        "text": "José García hit Wei Zhang with a stick near Nairobi",
+        "exact_roles_and_location": false,
+        "entities": [
+          {
+            "start": 16,
+            "end": 25,
+            "label": "VICTIM",
+            "text": "Wei Zhang"
+          }
+        ]
+      },
+      {
+        "text": "Wei Zhang was beaten by José García near Nairobi",
+        "exact_roles_and_location": false,
+        "entities": [
+          {
+            "start": 24,
+            "end": 48,
+            "label": "LOCATION",
+            "text": "José García near Nairobi"
+          }
+        ]
+      },
+      {
+        "text": "Kavya Subramaniam hit Oluwaseun Adebisi with a stick near Timbuktu",
+        "exact_roles_and_location": false,
+        "entities": [
+          {
+            "start": 22,
+            "end": 39,
+            "label": "VICTIM",
+            "text": "Oluwaseun Adebisi"
+          }
+        ]
+      },
+      {
+        "text": "Oluwaseun Adebisi was beaten by Kavya Subramaniam near Timbuktu",
+        "exact_roles_and_location": false,
+        "entities": [
+          {
+            "start": 32,
+            "end": 63,
+            "label": "LOCATION",
+            "text": "Kavya Subramaniam near Timbuktu"
+          }
+        ]
+      },
+      {
+        "text": "Fatima Al-Zahra hit Jean-Paul O’Connor with a stick near Montréal",
+        "exact_roles_and_location": false,
+        "entities": [
+          {
+            "start": 0,
+            "end": 38,
+            "label": "LOCATION",
+            "text": "Fatima Al-Zahra hit Jean-Paul O’Connor"
+          }
+        ]
+      },
+      {
+        "text": "Jean-Paul O’Connor was beaten by Fatima Al-Zahra near Montréal",
+        "exact_roles_and_location": false,
+        "entities": [
+          {
+            "start": 5,
+            "end": 18,
+            "label": "LOCATION",
+            "text": "Paul O’Connor"
+          },
+          {
+            "start": 33,
+            "end": 62,
+            "label": "LOCATION",
+            "text": "Fatima Al-Zahra near Montréal"
+          }
+        ]
+      },
+      {
+        "text": "rajiv hit sneha with a stick near pune",
+        "exact_roles_and_location": false,
+        "entities": []
+      },
+      {
+        "text": "sneha was beaten by rajiv near pune",
+        "exact_roles_and_location": false,
+        "entities": []
+      }
+    ]
+  },
+  "v3": {
+    "category_model": "TF-IDF",
+    "entity_model": "CRF",
+    "classification_accuracy": 0.96875,
+    "cases": [
+      {
+        "text": "sir my moblie stoln from pocket in bus ystrday",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "someone took my bag when i was buying ticket",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "my bicycle gone from outside cafe no one saw",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "someone quietly removed my wallet in the crowd",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "two fellows showed knife and took my phone near bus stand",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "he said give cash or i stab you so i gave cash",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "they pushed me down snatched gold chain and ran",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "gun point they took all money from me",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "went out came home door lock brokn laptop missing inside",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "someone entered our locked shop by breaking shutter and stole cash",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "thieves climbed through window into flat and took jewellery",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "house break in happened last nite things taken from cupboard",
+        "expected": "Burglary",
+        "prediction": "Theft",
+        "correct": false
+      },
+      {
+        "text": "he beating me with rod i got hurt on head",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "José García hit Wei Zhang with iron rod near Nairobi",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "fatima was punched by rajesh outside office",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "one fellow slaped me then kickd me nothing stolen",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "paid advance for phone seller disapeared no delivery and blocked my number",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "sir job promise they collected 5000 rupees now fake company",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "someone pretending bank staff made me transfer money",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "fake investment double money promise all savings gone",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "my acount hackd pasword changed unable login",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "clicked email link now all files locked asking bitcoin",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "someone using my email after stealing password",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "fake login site took otp and accessed my account",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "someone scrached car and broke mirrors purposely",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "they painted bad words on wall and smashed public bench",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "parked bike tyres punctured by person intentionally",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "bus stop glass broken deliberately nothing stolen",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "he put petrol on my shop and lit match full shop burning",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "someone purposely set our scooter on fire",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "poured kerosene then burned the shed intentionally",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "our warehouse torched by someone last night",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      }
+    ],
+    "exact_role_cases": 8,
+    "role_cases": [
+      {
+        "text": "José García hit Wei Zhang with a stick near Nairobi",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 11,
+            "label": "SUSPECT",
+            "text": "José García"
+          },
+          {
+            "start": 16,
+            "end": 25,
+            "label": "VICTIM",
+            "text": "Wei Zhang"
+          },
+          {
+            "start": 33,
+            "end": 38,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 44,
+            "end": 51,
+            "label": "LOCATION",
+            "text": "Nairobi"
+          }
+        ]
+      },
+      {
+        "text": "Wei Zhang was beaten by José García near Nairobi",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 9,
+            "label": "VICTIM",
+            "text": "Wei Zhang"
+          },
+          {
+            "start": 24,
+            "end": 35,
+            "label": "SUSPECT",
+            "text": "José García"
+          },
+          {
+            "start": 41,
+            "end": 48,
+            "label": "LOCATION",
+            "text": "Nairobi"
+          }
+        ]
+      },
+      {
+        "text": "Kavya Subramaniam hit Oluwaseun Adebisi with a stick near Timbuktu",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 17,
+            "label": "SUSPECT",
+            "text": "Kavya Subramaniam"
+          },
+          {
+            "start": 22,
+            "end": 39,
+            "label": "VICTIM",
+            "text": "Oluwaseun Adebisi"
+          },
+          {
+            "start": 47,
+            "end": 52,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 58,
+            "end": 66,
+            "label": "LOCATION",
+            "text": "Timbuktu"
+          }
+        ]
+      },
+      {
+        "text": "Oluwaseun Adebisi was beaten by Kavya Subramaniam near Timbuktu",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 17,
+            "label": "VICTIM",
+            "text": "Oluwaseun Adebisi"
+          },
+          {
+            "start": 32,
+            "end": 49,
+            "label": "SUSPECT",
+            "text": "Kavya Subramaniam"
+          },
+          {
+            "start": 55,
+            "end": 63,
+            "label": "LOCATION",
+            "text": "Timbuktu"
+          }
+        ]
+      },
+      {
+        "text": "Fatima Al-Zahra hit Jean-Paul O’Connor with a stick near Montréal",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 15,
+            "label": "SUSPECT",
+            "text": "Fatima Al-Zahra"
+          },
+          {
+            "start": 20,
+            "end": 38,
+            "label": "VICTIM",
+            "text": "Jean-Paul O’Connor"
+          },
+          {
+            "start": 46,
+            "end": 51,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 57,
+            "end": 65,
+            "label": "LOCATION",
+            "text": "Montréal"
+          }
+        ]
+      },
+      {
+        "text": "Jean-Paul O’Connor was beaten by Fatima Al-Zahra near Montréal",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 18,
+            "label": "VICTIM",
+            "text": "Jean-Paul O’Connor"
+          },
+          {
+            "start": 33,
+            "end": 48,
+            "label": "SUSPECT",
+            "text": "Fatima Al-Zahra"
+          },
+          {
+            "start": 54,
+            "end": 62,
+            "label": "LOCATION",
+            "text": "Montréal"
+          }
+        ]
+      },
+      {
+        "text": "rajiv hit sneha with a stick near pune",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 5,
+            "label": "SUSPECT",
+            "text": "rajiv"
+          },
+          {
+            "start": 10,
+            "end": 15,
+            "label": "VICTIM",
+            "text": "sneha"
+          },
+          {
+            "start": 23,
+            "end": 28,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 34,
+            "end": 38,
+            "label": "LOCATION",
+            "text": "pune"
+          }
+        ]
+      },
+      {
+        "text": "sneha was beaten by rajiv near pune",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 5,
+            "label": "VICTIM",
+            "text": "sneha"
+          },
+          {
+            "start": 20,
+            "end": 25,
+            "label": "SUSPECT",
+            "text": "rajiv"
+          },
+          {
+            "start": 31,
+            "end": 35,
+            "label": "LOCATION",
+            "text": "pune"
+          }
+        ]
+      }
+    ]
+  },
+  "v3.1": {
+    "category_model": "TF-IDF",
+    "entity_model": "CRF",
+    "classification_accuracy": 0.96875,
+    "cases": [
+      {
+        "text": "sir my moblie stoln from pocket in bus ystrday",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "someone took my bag when i was buying ticket",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "my bicycle gone from outside cafe no one saw",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "someone quietly removed my wallet in the crowd",
+        "expected": "Theft",
+        "prediction": "Theft",
+        "correct": true
+      },
+      {
+        "text": "two fellows showed knife and took my phone near bus stand",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "he said give cash or i stab you so i gave cash",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "they pushed me down snatched gold chain and ran",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "gun point they took all money from me",
+        "expected": "Robbery",
+        "prediction": "Robbery",
+        "correct": true
+      },
+      {
+        "text": "went out came home door lock brokn laptop missing inside",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "someone entered our locked shop by breaking shutter and stole cash",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "thieves climbed through window into flat and took jewellery",
+        "expected": "Burglary",
+        "prediction": "Burglary",
+        "correct": true
+      },
+      {
+        "text": "house break in happened last nite things taken from cupboard",
+        "expected": "Burglary",
+        "prediction": "Theft",
+        "correct": false
+      },
+      {
+        "text": "he beating me with rod i got hurt on head",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "José García hit Wei Zhang with iron rod near Nairobi",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "fatima was punched by rajesh outside office",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "one fellow slaped me then kickd me nothing stolen",
+        "expected": "Assault",
+        "prediction": "Assault",
+        "correct": true
+      },
+      {
+        "text": "paid advance for phone seller disapeared no delivery and blocked my number",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "sir job promise they collected 5000 rupees now fake company",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "someone pretending bank staff made me transfer money",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "fake investment double money promise all savings gone",
+        "expected": "Fraud",
+        "prediction": "Fraud",
+        "correct": true
+      },
+      {
+        "text": "my acount hackd pasword changed unable login",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "clicked email link now all files locked asking bitcoin",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "someone using my email after stealing password",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "fake login site took otp and accessed my account",
+        "expected": "Cybercrime",
+        "prediction": "Cybercrime",
+        "correct": true
+      },
+      {
+        "text": "someone scrached car and broke mirrors purposely",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "they painted bad words on wall and smashed public bench",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "parked bike tyres punctured by person intentionally",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "bus stop glass broken deliberately nothing stolen",
+        "expected": "Vandalism",
+        "prediction": "Vandalism",
+        "correct": true
+      },
+      {
+        "text": "he put petrol on my shop and lit match full shop burning",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "someone purposely set our scooter on fire",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "poured kerosene then burned the shed intentionally",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      },
+      {
+        "text": "our warehouse torched by someone last night",
+        "expected": "Arson",
+        "prediction": "Arson",
+        "correct": true
+      }
+    ],
+    "exact_role_cases": 8,
+    "role_cases": [
+      {
+        "text": "José García hit Wei Zhang with a stick near Nairobi",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 11,
+            "label": "SUSPECT",
+            "text": "José García"
+          },
+          {
+            "start": 16,
+            "end": 25,
+            "label": "VICTIM",
+            "text": "Wei Zhang"
+          },
+          {
+            "start": 33,
+            "end": 38,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 44,
+            "end": 51,
+            "label": "LOCATION",
+            "text": "Nairobi"
+          }
+        ]
+      },
+      {
+        "text": "Wei Zhang was beaten by José García near Nairobi",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 9,
+            "label": "VICTIM",
+            "text": "Wei Zhang"
+          },
+          {
+            "start": 24,
+            "end": 35,
+            "label": "SUSPECT",
+            "text": "José García"
+          },
+          {
+            "start": 41,
+            "end": 48,
+            "label": "LOCATION",
+            "text": "Nairobi"
+          }
+        ]
+      },
+      {
+        "text": "Kavya Subramaniam hit Oluwaseun Adebisi with a stick near Timbuktu",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 17,
+            "label": "SUSPECT",
+            "text": "Kavya Subramaniam"
+          },
+          {
+            "start": 22,
+            "end": 39,
+            "label": "VICTIM",
+            "text": "Oluwaseun Adebisi"
+          },
+          {
+            "start": 47,
+            "end": 52,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 58,
+            "end": 66,
+            "label": "LOCATION",
+            "text": "Timbuktu"
+          }
+        ]
+      },
+      {
+        "text": "Oluwaseun Adebisi was beaten by Kavya Subramaniam near Timbuktu",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 17,
+            "label": "VICTIM",
+            "text": "Oluwaseun Adebisi"
+          },
+          {
+            "start": 32,
+            "end": 49,
+            "label": "SUSPECT",
+            "text": "Kavya Subramaniam"
+          },
+          {
+            "start": 55,
+            "end": 63,
+            "label": "LOCATION",
+            "text": "Timbuktu"
+          }
+        ]
+      },
+      {
+        "text": "Fatima Al-Zahra hit Jean-Paul O’Connor with a stick near Montréal",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 15,
+            "label": "SUSPECT",
+            "text": "Fatima Al-Zahra"
+          },
+          {
+            "start": 20,
+            "end": 38,
+            "label": "VICTIM",
+            "text": "Jean-Paul O’Connor"
+          },
+          {
+            "start": 46,
+            "end": 51,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 57,
+            "end": 65,
+            "label": "LOCATION",
+            "text": "Montréal"
+          }
+        ]
+      },
+      {
+        "text": "Jean-Paul O’Connor was beaten by Fatima Al-Zahra near Montréal",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 18,
+            "label": "VICTIM",
+            "text": "Jean-Paul O’Connor"
+          },
+          {
+            "start": 33,
+            "end": 48,
+            "label": "SUSPECT",
+            "text": "Fatima Al-Zahra"
+          },
+          {
+            "start": 54,
+            "end": 62,
+            "label": "LOCATION",
+            "text": "Montréal"
+          }
+        ]
+      },
+      {
+        "text": "rajiv hit sneha with a stick near pune",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 5,
+            "label": "SUSPECT",
+            "text": "rajiv"
+          },
+          {
+            "start": 10,
+            "end": 15,
+            "label": "VICTIM",
+            "text": "sneha"
+          },
+          {
+            "start": 23,
+            "end": 28,
+            "label": "WEAPON",
+            "text": "stick"
+          },
+          {
+            "start": 34,
+            "end": 38,
+            "label": "LOCATION",
+            "text": "pune"
+          }
+        ]
+      },
+      {
+        "text": "sneha was beaten by rajiv near pune",
+        "exact_roles_and_location": true,
+        "entities": [
+          {
+            "start": 0,
+            "end": 5,
+            "label": "VICTIM",
+            "text": "sneha"
+          },
+          {
+            "start": 20,
+            "end": 25,
+            "label": "SUSPECT",
+            "text": "rajiv"
+          },
+          {
+            "start": 31,
+            "end": 35,
+            "label": "LOCATION",
+            "text": "pune"
+          }
+        ]
+      }
+    ]
+  }
+}

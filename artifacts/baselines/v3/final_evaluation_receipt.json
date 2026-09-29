@@ -1,0 +1,6 @@
+{
+  "evaluated_at": "2026-09-28T18:47:33.781066+00:00",
+  "frozen_at": "2026-09-28T18:47:28.845065+00:00",
+  "selected_ner": "CRF",
+  "note": "Do not retune this release from final-test outputs; create a new version and independent holdout for future development."
+}

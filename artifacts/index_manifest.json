@@ -1,9 +1,10 @@
 {
   "rows": 60000,
-  "report_order_sha256": "c1ac270035ea355a1593a2196d4ba5723017c62aae1c87b4f69c92f88a466b5d",
+  "report_order_sha256": "754ac27fa2ed8a93518edd6052c9a9ce8e4e78acedfbcdd27d0e647203dfa259",
   "semantic_model": "sentence-transformers/all-MiniLM-L6-v2",
   "dimensions": 384,
   "max_subword_tokens": 128,
   "storage": "float16, normalized vectors",
-  "ner_model": "CRF"
+  "ner_model": "CRF",
+  "entity_model_version": "3.1.0"
 }

@@ -1,5 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><title>Decoding Crime Narratives — Project Report</title><style>body{font:14px/1.65 Arial,sans-serif;color:#203245;max-width:900px;margin:45px auto;padding:0 30px}h1{font-size:30px;color:#0c655f;line-height:1.3}h2{font-size:20px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:12px}td,th{border:1px solid #d7e1e6;padding:8px;text-align:left}th{background:#edf4f3}code{font-size:12px;background:#f0f3f5;padding:2px 4px}a{color:#126b78}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f3f5;padding:12px}td,code{overflow-wrap:anywhere}p,li{orphans:3;widows:3}h1,h2,h3{break-after:avoid}@media print{body{margin:0;max-width:none;font-size:11px}.new-page{break-before:page}h1{font-size:25px}h2{font-size:17px}a{color:inherit}table{break-inside:avoid}}</style></head><body><h1>Decoding Crime Narratives using NLP and Big Data Analytics</h1>
-<h2>A complete beginner's project report — Version 2</h2>
+<h2>A complete beginner's project report — Version 3.1</h2>
+<p>The 3.1 entity revision adds generated ownership, active/passive violence and FIR-style administrative contexts to CRF/BERT training, fixes shared punctuation boundaries and preserves exact displayed characters. See ENTITY_CONTEXT_V3_1.md. The NER evaluation now mixes a previously viewed V3 subset with generated context examples; its scope differs from the unchanged document-model benchmark.</p>
+<p>Version 3 adds informal English and spelling variation within the original algorithms. Read ROBUSTNESS_V3.md for the precise changes, development challenges and limits. The measured appendix contains the current results; the explicitly labeled V2 discussion is historical.</p>
 <h3>How to read this report</h3>
 <p>Start at Chapter 1 even if you have never used machine learning. Chapters 1–4 explain the problem and the data. Chapters 5–9 explain every NLP component with examples. Chapters 10–13 explain evaluation, the dashboard and how to run the code. Chapters 14–17 cover the syllabus, limitations, improvements and glossary. The measured-results appendix is generated from the actual saved experiment outputs, rather than manually typed scores.</p>
 <p>This is an English-language university research prototype. Its 60,000 clean reports describe fictional events. It demonstrates engineering and NLP methods; it does not establish that its predictions are accurate on real police files.</p>
@@ -71,7 +73,7 @@
 <p>Most expensive processing happens before the browser opens. This is a batch system, not a live police-feed service.</p>
 <h2>3. Dataset: where the reports come from</h2>
 <p>The project deliberately generates its own dataset, which is allowed by the project requirements. It does not silently substitute synthetic text for an alleged real-world download.</p>
-<p>There are eight balanced categories: Assault, Arson, Burglary, Cybercrime, Fraud, Robbery, Theft and Vandalism. Names, places, events and dates are fictional. The generator produces 60,000 valid unique examples, then injects known faults so cleaning can be checked:</p>
+<p>There are eight balanced categories: Assault, Arson, Burglary, Cybercrime, Fraud, Robbery, Theft and Vandalism. Events and roles are fictional. Place vocabulary includes real international cities; no event is a claim about those cities or any actual person. The generator produces 60,000 valid unique examples, then injects known faults so cleaning can be checked:</p>
 <table>
 <thead>
 <tr>
@@ -108,8 +110,8 @@
 </tr>
 </tbody>
 </table>
-<p>Version 2 combines 8 categories, 8 incident variants and 6 sentence layouts into <strong>384 composite scenario groups</strong>. This does not mean 384 independently authored stories. Many words and grammar patterns remain shared.</p>
-<p>Participant phrases and first-name pools differ by split. Some stories have an unidentified suspect, multiple suspects, multiple victims, negated weapon mentions, spelling noise or extra follow-up sentences. These variations help expose weaknesses hidden by one repetitive sentence format.</p>
+<p>Version 3 includes <strong>528 scenario groups</strong>: 384 formal composite groups and 144 informal event groups. There are 12,000 formal reports and 48,000 informal reports. Informal inputs include short fragments, Indian English phrasings, actual misspellings, omitted function words, irregular spacing and varied casing. These are generated groups, not independently authored stories. Many words and grammar patterns remain shared.</p>
+<p>Formal participant phrases and first-name pools differ by split. Informal event patterns, full-name pools and place pools differ by split; randomly invented names add unfamiliar surfaces. All noise variants of an event remain in its assigned split. Normalized duplicates are rejected across all splits. Some formal stories also have unidentified suspects, multiple participants and negated weapons. Original source spans remain exact through every training-text edit.</p>
 <h3>A record and its fields</h3>
 <p>A JSON object is a set of named values. JSONL stores one such object per line. The generated record includes:</p>
 <table>
@@ -169,7 +171,7 @@
 <p>Parquet is a column-oriented file format. Reading only the columns needed for a chart can reduce I/O compared with loading every long narrative. Partition folders organize reports by their split.</p>
 <p>A <strong>shuffle</strong> redistributes records across executors. Deduplication and grouped aggregation may require shuffles; they can be more expensive than filtering a partition independently.</p>
 <h3>What was actually executed?</h3>
-<p>Version 2 was run against a standalone master and <strong>two worker processes on this one Windows computer</strong>. The run processed all 60,000 clean reports. <code>artifacts/cluster_execution.json</code> records worker registration and completion; <code>spark_metrics.json</code> records the actual master and counts. <code>spark_execution_plan.txt</code> exposes the physical plan.</p>
+<p>Version 3 was run against a standalone master and <strong>two worker processes on this one Windows computer</strong>. The run processed all 60,000 clean reports. <code>artifacts/cluster_execution.json</code> records worker registration and completion; <code>spark_metrics.json</code> records the actual master and counts. <code>spark_execution_plan.txt</code> exposes the physical plan.</p>
 <p>This is separate-worker execution on one host, not proof of multi-machine scalability, fault tolerance under machine failure, or an HDFS deployment. The default simpler reproduction uses <code>local[2]</code>, which runs local Spark tasks without a separate master.</p>
 <h3>MLlib baseline</h3>
 <p>The MLlib pipeline is:</p>
@@ -192,6 +194,7 @@
 <p><code>IDF(word) = log((1 + number_of_documents) / (1 + documents_containing_word)) + 1</code></p>
 <p>In a corpus of 100 documents, a word appearing in 99 has IDF about 1.01; a word appearing in 4 has IDF about 4.01. Actual feature values also depend on the vectorizer's term-frequency and normalization settings. These numbers are a teaching illustration, not saved experiment features.</p>
 <p>The vocabulary and IDF are fitted on training text only. Fitting them on the test set would leak information about the evaluation distribution.</p>
+<p>Version 3 combines word unigrams/bigrams with character 3–5-grams in the same TF-IDF representation and logistic regression model. A typo can lose its whole-word match while retaining useful character fragments. Character features receive weight 0.75 relative to the word branch. This does not autocorrect the source and does not introduce a new classification algorithm. Keyword search continues to use the word branch so a misspelled string cannot become an unexplained exact-keyword match.</p>
 <h3>6.3 Neural Word2Vec embeddings</h3>
 <p>Word2Vec is a small neural model trained to learn contextual relationships between words. This project uses Gensim skip-gram with 100-dimensional vectors, trained on its training partition. A document vector is the average of its known word vectors, followed by logistic regression.</p>
 <p>Averaging is efficient but loses word order. “Alex accused Morgan” and “Morgan accused Alex” can have similar averages even though their roles differ. Unknown words contribute no vector; an entirely unknown document gets a zero vector.</p>
@@ -236,11 +239,12 @@
 <p>B means beginning, I means inside the same entity, and O means outside an entity. Both span boundaries and entity type must be correct for strict entity scoring.</p>
 <h3>CRF</h3>
 <p>A Conditional Random Field learns relationships between nearby labels and features such as capitalization, neighboring words, position and sentence context. It can learn that a name after a reporting phrase often describes a victim, while a name after an identification phrase may be a suspect. These are learned patterns, not guaranteed rules.</p>
+<p>Version 3 uses a four-token lexical window on each side plus word shape and distances to action, role and preposition cues within eight tokens. Training includes lowercase and invented names, active/passive constructions and varied name lengths. Cue observations do not directly assign roles: the same linear-chain CRF learns their weights. No inference-time name or country list is used.</p>
 <h3>BERT token classifier</h3>
 <p>A second model fine-tunes BERT to predict BIO labels. BERT may split one word into multiple subwords; only the first subword receives a training label and other pieces use the ignored loss value -100. Predictions are mapped back to original words.</p>
 <p>Overlapping windows reduce boundary losses in long cases. Probabilities for repeated words are averaged, and invalid orphan I-tags are repaired to begin a span. Extremely unusual text can still challenge tokenization.</p>
 <h3>Which model is shown?</h3>
-<p>Both models are trained and scored on validation. The higher validation strict span F1 wins; ties prefer the faster CRF. In the executed V2 run, CRF is selected. Users can explicitly compare both in Narrative Lab. Model choice is not changed after inspecting final-test scores.</p>
+<p>Both models are trained and scored on validation. The higher validation strict span F1 wins; ties prefer the faster CRF. The current selection is saved in the model folder and shown in the dashboard. Users can explicitly compare both in Narrative Lab. Model choice is not changed after inspecting final-test scores.</p>
 <p>A short preceding-word heuristic marks mentions such as “No knife” as negated. It is not full logical reasoning and may mishandle complicated negation or quoted allegations. Entity confidence is a model score, not verified factual confidence.</p>
 <h2>8. Topics, sentiment and summaries</h2>
 <h3>Topic modeling: LDA and NMF</h3>
@@ -259,7 +263,7 @@
 <p>Each case embedding uses at most 128 subword tokens for bounded CPU cost. Later details in a long case can be missed. The index stores float16 vectors on disk and loads them through a memory map. Query scoring reads chunks instead of copying the entire embedding matrix.</p>
 <p>Hybrid search combines keyword and semantic <strong>ranks</strong>, using reciprocal-rank fusion. It does not pretend that the two raw similarity scales are identical. Entity filters use predicted mentions stored in SQLite; missed entities can therefore cause missed filtered results.</p>
 <p>For a question within a case, the app retrieves up to two matching source sentences, displays the report ID and sentence numbers, and returns “Insufficient evidence” below its threshold. This is evidence retrieval, not a general conversational assistant or verified question-answering model. A retrieved sentence may be relevant without answering the question.</p>
-<p>TF-IDF prediction explanations show positively contributing word features. They describe correlations in a linear classifier, not causal reasons why a crime occurred.</p>
+<p>TF-IDF prediction explanations show positively contributing words, phrases and character fragments, with their feature type. They describe correlations in a linear classifier, not causal reasons why a crime occurred.</p>
 <h2>10. Evaluation: how to judge the results honestly</h2>
 <h3>Four data roles</h3>
 <table>
@@ -267,14 +271,14 @@
 <tr>
 <th>Split</th>
 <th>Use</th>
-<th style="text-align:right">V2 sample for document models</th>
+<th style="text-align:right">V3 sample for document models</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Training</td>
 <td>Fit parameters and feature vocabulary</td>
-<td style="text-align:right">6,400</td>
+<td style="text-align:right">12,000</td>
 </tr>
 <tr>
 <td>Validation</td>
@@ -293,7 +297,7 @@
 </tr>
 </tbody>
 </table>
-<p>The complete corpus has larger split partitions. These samples keep the CPU experiment practical. NER uses its own documented subsets: 3,200 training reports, 400 validation reports and 600 final-test reports.</p>
+<p>The complete corpus has larger split partitions. These samples keep the CPU experiment practical. NER uses its own documented subsets: 8,000 training reports, 400 validation reports and 600 final-test reports.</p>
 <p>Incident variants, participant phrasings and first-name pools are assigned before fitting. Composite groups do not overlap between splits. Three-fold grouped cross-validation of TF-IDF uses incident variants within training, keeping related layouts together.</p>
 <p>A SHA-256 receipt records model files before final predictions. The final-test receipt records completion. Once results have been viewed, the test is no longer unseen to the researchers; future tuning should use a new independent evaluation protocol.</p>
 <p>The corpus still shares generator vocabulary and grammar across splits. This protocol reduces some leakage but cannot establish real-world generalization.</p>
@@ -306,10 +310,10 @@
 <p>The report includes a 95% accuracy interval from 400 report-level bootstrap resamples. It captures variation when resampling this synthetic test, not uncertainty from new templates, new sources or new cities.</p>
 <p>A score of 0.9 is useful only if similarly scored predictions are correct roughly 90% of the time. Temperature scaling adjusts TF-IDF probabilities using validation labels. It preserves the winning category and changes score sharpness.</p>
 <p>Expected Calibration Error (ECE) compares average confidence with accuracy in bins. Lower is generally better under the same evaluation. Calibration can become worse when the data distribution changes, so before/after results are reported honestly.</p>
-<p>Predictions below the configured 0.60 score are marked for review. Coverage is the fraction above that threshold. Accuracy among accepted predictions must be read alongside coverage: accepting very few easy cases can inflate that accuracy.</p>
+<p>Predictions below the configured 0.60 score are marked for review. The app also flags fewer than three words, low training-vocabulary coverage, raw confidence below 0.45 or a raw top-two margin below 0.15. These are transparent heuristics, not a separate model. Reported calibration coverage measures only the 0.60 calibrated-score threshold, not the combined UI policy. Accuracy among accepted predictions must be read alongside coverage: accepting very few easy cases can inflate that accuracy.</p>
 <h3>Comparing versions</h3>
 <p>V1 artifacts are retained in <code>artifacts/baselines/v1/</code>. V2 changes the corpus, entities, splits and training protocol. A higher V2 NER score therefore does not isolate the benefit of one algorithm. It is not an apples-to-apples causal improvement claim. The measured appendix gives all current model scores, including disappointing results.</p>
-<h3>What the executed V2 results teach us</h3>
+<h3>Historical V2 results (archived; not the current benchmark)</h3>
 <p>Word2Vec document classification reaches 95.17% accuracy on the fixed final sample, compared with 83.67% for TF-IDF and 83.25% for compact BERT. This is evidence about this particular experiment, not a universal model ranking.</p>
 <p>TF-IDF's training-only grouped cross-validation macro-F1 is only 0.2502, much lower than its 0.7934 final-test macro-F1. These different held-out variant sets have very different difficulty. The disparity warns that the final split alone gives an incomplete picture of robustness.</p>
 <p>CRF's overall strict entity F1 is 0.9846, but PROPERTY recall is only 0.44 and its F1 is 0.6111. More frequent, easier entity types dominate the overall score. This is why a useful evaluation shows per-type results, not just one impressive headline number. BERT entity F1 is 0.8741 on the final sample.</p>
@@ -331,7 +335,7 @@
 <p>User-submitted text is analyzed in memory. Saving a correction is an explicit action; the local feedback database stores its text hash, predicted class and corrected class. It does not automatically retrain a model. Clear the session to discard its in-memory analysis.</p>
 <h2>12. Run the project step by step</h2>
 <h3>On the completed development computer</h3>
-<p>Open the project folder, run <code>START_DASHBOARD.cmd</code>, and visit http://localhost:8501. Read the root README, not <code>.pytest_cache/README.md</code>: that cache file belongs to the testing tool.</p>
+<p>Open the project folder, run <code>START_DASHBOARD.cmd</code>, and visit http://localhost:8502. Read the root README, not <code>.pytest_cache/README.md</code>: that cache file belongs to the testing tool.</p>
 <h3>A fresh Windows installation</h3>
 <p>Install Python 3.12 and Java 17. Use a trusted compatible Hadoop native distribution on Windows and set HADOOP_HOME if needed. The supplied setup script can prepare the local Java and Python resources; Linux avoids Windows Hadoop native-library issues. Allow several GB for packages, data and downloaded models.</p>
 <p>Open PowerShell in the repository folder:</p>
@@ -487,7 +491,9 @@
 <p>Big Data topics appear in Spark partitions and execution, relational DataFrames and SQL, transformations/actions, Parquet and MLlib pipelines. The Scala file demonstrates immutable values, collections, case classes, traits, pattern matching, closures and map/filter-style operations.</p>
 <p>BERT and CRF are chosen from the requested alternatives. GPT, HMM, machine translation, GloVe, streaming ingestion and a generative n-gram language model are not additional implemented systems. Bigrams in a vectorizer are features, not a probabilistic text generator.</p>
 <p>Run <code>python scripts/run_scala.py</code> inside the environment to execute the Scala example against the processed data. The report does not imply that the main Python dashboard was rewritten in Scala.</p>
-<h2>15. What improved in Version 2?</h2>
+<h2>15. What improved across versions?</h2>
+<p>Version 3 broadens the data to informal English and international names, preserves spans through real noise edits, uses word and character TF-IDF in the existing classifier, expands the CRF context features and retrains the original model families. It adds direct name/role checks, explicit input-quality review reasons and a hand-written development comparison against retained V2 weights. ROBUSTNESS_V3.md documents the constraints and remaining limits. No external spell checker, translation service or new model family was added.</p>
+<p>The earlier Version 2 changes are retained:</p>
 <p>The upgrade adds varied composite scenarios, eight entity types, a separately fine-tuned BERT entity tagger, validation-based tagger selection, a final-test freeze receipt, grouped cross-validation, bootstrap intervals, calibration and review flags.</p>
 <p>It also adds cleaner topic inputs and NMF comparison; real two-worker single-host Spark execution and quality reports; semantic/hybrid retrieval and cited evidence sentences; a disk-backed case store and pagination; prediction explanations, redacted downloads and opt-in corrections; a validated external import staging path; and this beginner documentation.</p>
 <p>These are implemented features, not guarantees that all scores increased. Refer to IMPROVEMENTS_V2.md for the distinction between delivered work and future extensions.</p>
@@ -597,7 +603,7 @@
 <li>Enriched narratives: <strong>60,000</strong></li>
 </ul>
 <h2>Same-split model comparison</h2>
-<p>Train / validation / development / final test: 6,400 / 800 / 800 / 1,200.</p>
+<p>Train / validation / development / final test: 12,000 / 800 / 800 / 1,200.</p>
 <table>
 <thead>
 <tr>
@@ -610,32 +616,33 @@
 <tbody>
 <tr>
 <td>Bag of Words</td>
-<td style="text-align:right">0.7842</td>
-<td style="text-align:right">0.7393</td>
-<td style="text-align:right">0.7393</td>
+<td style="text-align:right">0.8067</td>
+<td style="text-align:right">0.8068</td>
+<td style="text-align:right">0.8068</td>
 </tr>
 <tr>
 <td>TF-IDF</td>
-<td style="text-align:right">0.8367</td>
-<td style="text-align:right">0.7934</td>
-<td style="text-align:right">0.7934</td>
+<td style="text-align:right">0.8825</td>
+<td style="text-align:right">0.8815</td>
+<td style="text-align:right">0.8815</td>
 </tr>
 <tr>
 <td>Word2Vec</td>
-<td style="text-align:right">0.9517</td>
-<td style="text-align:right">0.9505</td>
-<td style="text-align:right">0.9505</td>
+<td style="text-align:right">0.8217</td>
+<td style="text-align:right">0.8188</td>
+<td style="text-align:right">0.8188</td>
 </tr>
 <tr>
 <td>BERT</td>
-<td style="text-align:right">0.8325</td>
-<td style="text-align:right">0.7906</td>
-<td style="text-align:right">0.7906</td>
+<td style="text-align:right">0.7958</td>
+<td style="text-align:right">0.7926</td>
+<td style="text-align:right">0.7926</td>
 </tr>
 </tbody>
 </table>
 <h2>Entity extraction</h2>
-<p>Validation-selected CRF strict entity F1: <strong>0.9846</strong> on 600 final-test narratives.</p>
+<p>Validation-selected CRF strict entity F1: <strong>0.9123</strong> on 600 evaluation narratives.</p>
+<p>Retained V3 test subset is previously viewed; new synthetic context cases share grammar. Screenshot cases are development regressions, not a final benchmark.</p>
 <table>
 <thead>
 <tr>
@@ -648,21 +655,21 @@
 <tbody>
 <tr>
 <td>SUSPECT</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">1.0000</td>
+<td style="text-align:right">0.8501</td>
+<td style="text-align:right">0.8134</td>
+<td style="text-align:right">0.8313</td>
 </tr>
 <tr>
 <td>VICTIM</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">1.0000</td>
+<td style="text-align:right">0.8792</td>
+<td style="text-align:right">0.7806</td>
+<td style="text-align:right">0.8270</td>
 </tr>
 <tr>
 <td>LOCATION</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">1.0000</td>
+<td style="text-align:right">0.9600</td>
+<td style="text-align:right">0.8444</td>
+<td style="text-align:right">0.8985</td>
 </tr>
 <tr>
 <td>WEAPON</td>
@@ -672,9 +679,9 @@
 </tr>
 <tr>
 <td>PROPERTY</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">0.4400</td>
-<td style="text-align:right">0.6111</td>
+<td style="text-align:right">0.9701</td>
+<td style="text-align:right">0.9177</td>
+<td style="text-align:right">0.9432</td>
 </tr>
 <tr>
 <td>DATE</td>
@@ -696,12 +703,12 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Material limitation:</strong> held-out recall is below 80% for PROPERTY. The overall entity F1 is dominated by more frequent types; consult each row above. Review predicted roles against the original text.</p>
+<p><strong>Material limitation:</strong> held-out recall is below 80% for VICTIM. The overall entity F1 is dominated by more frequent types; consult each row above. Review predicted roles against the original text.</p>
 <h2>Distributed baseline and topics</h2>
-<p>MLlib accuracy: <strong>0.8749</strong>; weighted F1: <strong>0.8335</strong>. It uses 37,512 training and 7,496 test rows, so sample sizes differ from the four-model comparison.</p>
-<p>LDA held-out perplexity: <strong>126.40</strong>; top-term diversity: <strong>0.662</strong>.</p>
+<p>MLlib accuracy: <strong>0.7970</strong>; weighted F1: <strong>0.7895</strong>. It uses 39,528 training and 6,824 test rows, so sample sizes differ from the four-model comparison.</p>
+<p>LDA held-out perplexity: <strong>476.67</strong>; top-term diversity: <strong>0.900</strong>.</p>
 <h2>Verification</h2>
-<p>Pytest: <strong>31 passed in 12.43s</strong>.</p>
+<p>Pytest: <strong>51 passed in 18.07s</strong>.</p>
 <p>Scala report count verified: <strong>60,000</strong>.</p>
 <p>The Windows Scala run completed its computations and exited successfully, with a non-fatal Spark temporary-JAR cleanup warning at shutdown.</p>
 <p>Browser smoke check: <strong>passed</strong>. Pages visited: Overview, Case explorer, Narrative lab, Model evaluation, Topics, Pipeline &amp; syllabus, Learning guide.</p>
@@ -716,24 +723,24 @@
 <tbody>
 <tr>
 <td>Bag of Words</td>
-<td>0.7633 to 0.8092</td>
+<td>0.7817 to 0.8275</td>
 </tr>
 <tr>
 <td>TF-IDF</td>
-<td>0.8175 to 0.8575</td>
+<td>0.8633 to 0.9000</td>
 </tr>
 <tr>
 <td>Word2Vec</td>
-<td>0.9400 to 0.9625</td>
+<td>0.8000 to 0.8425</td>
 </tr>
 <tr>
 <td>BERT</td>
-<td>0.8125 to 0.8517</td>
+<td>0.7750 to 0.8200</td>
 </tr>
 </tbody>
 </table>
 <p>Intervals use 400 report-level bootstrap resamples and do not cover new-source uncertainty.</p>
-<p>Training-only grouped TF-IDF CV mean macro-F1: <strong>0.2502</strong>.</p>
+<p>Training-only grouped TF-IDF CV mean macro-F1: <strong>0.6708</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -747,17 +754,17 @@
 <tbody>
 <tr>
 <td>before</td>
-<td style="text-align:right">0.3830</td>
-<td style="text-align:right">0.9476</td>
-<td style="text-align:right">0.2033</td>
-<td style="text-align:right">1.0000</td>
+<td style="text-align:right">0.2202</td>
+<td style="text-align:right">0.5465</td>
+<td style="text-align:right">0.6033</td>
+<td style="text-align:right">0.9834</td>
 </tr>
 <tr>
 <td>after</td>
-<td style="text-align:right">0.0757</td>
-<td style="text-align:right">0.4668</td>
-<td style="text-align:right">0.9217</td>
-<td style="text-align:right">0.8580</td>
+<td style="text-align:right">0.0672</td>
+<td style="text-align:right">0.3254</td>
+<td style="text-align:right">0.9483</td>
+<td style="text-align:right">0.9042</td>
 </tr>
 </tbody>
 </table>
@@ -774,17 +781,46 @@
 <tbody>
 <tr>
 <td>CRF</td>
-<td style="text-align:right">1.0000</td>
-<td style="text-align:right">0.9846</td>
+<td style="text-align:right">0.9391</td>
+<td style="text-align:right">0.9123</td>
 </tr>
 <tr>
 <td>BERT</td>
-<td style="text-align:right">0.9414</td>
-<td style="text-align:right">0.8741</td>
+<td style="text-align:right">0.8351</td>
+<td style="text-align:right">0.7615</td>
 </tr>
 </tbody>
 </table>
+<h2>Informal English development challenges</h2>
+<p>Fixed hand-written development/regression examples; not an independent real-world benchmark.</p>
+<table>
+<thead>
+<tr>
+<th>Release</th>
+<th style="text-align:right">Category cases correct / 32</th>
+<th style="text-align:right">Exact people + location cases / 8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v2</td>
+<td style="text-align:right">23</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>v3</td>
+<td style="text-align:right">31</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td>v3.1</td>
+<td style="text-align:right">31</td>
+<td style="text-align:right">6</td>
+</tr>
+</tbody>
+</table>
+<p>These hand-written examples informed development. They are not an untouched final benchmark or evidence of flawless real-world performance. Every case is retained in artifacts/robustness_development.json.</p>
 <h2>Interpretation</h2>
-<p>The corpus is synthetic. Scenario groups are separated, but vocabulary and generator conventions are shared. V2 model hashes were frozen before final predictions. No human-reference accuracy is claimed for syntax, sentiment, threat heuristics, search or summarization. Spark ran with a standalone master and two workers on one physical host; Docker and multi-host deployment were not exercised. V1 and V2 scores use different corpora and protocols.</p>
+<p>The corpus is synthetic. Scenario groups are separated, but vocabulary and generator conventions are shared. V3 model hashes were frozen before final predictions. No human-reference accuracy is claimed for syntax, sentiment, threat heuristics, search or summarization. Standalone Spark master and worker processes; see cluster_execution.json for verified workers and host scope. Docker and multi-host deployment were not exercised. Version benchmarks use different corpora and protocols.</p>
 <p>Resources: <code>artifacts/evaluation.json</code>, <code>ner_evaluation.json</code>, <code>spark_metrics.json</code>, <code>topics.json</code>, split ID CSVs, and <code>logs/</code>.</p>
 </body></html>

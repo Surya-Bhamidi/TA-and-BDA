@@ -1,0 +1,193 @@
+{
+  "model": "C:\\Users\\bhara\\OneDrive\\Desktop\\TA AND BDA - Copy\\Final Project\\artifacts\\models\\v3_1",
+  "scope": "User-provided development regressions and name substitutions; not an independent benchmark",
+  "cases": [
+    {
+      "text": "Mayank stole the phone of Surya while he was sleeping on 29-06-2026",
+      "entities": [
+        {
+          "start": 0,
+          "end": 6,
+          "label": "SUSPECT",
+          "text": "Mayank"
+        },
+        {
+          "start": 17,
+          "end": 22,
+          "label": "PROPERTY",
+          "text": "phone"
+        },
+        {
+          "start": 26,
+          "end": 31,
+          "label": "VICTIM",
+          "text": "Surya"
+        },
+        {
+          "start": 57,
+          "end": 67,
+          "label": "DATE",
+          "text": "29-06-2026"
+        }
+      ]
+    },
+    {
+      "text": "Surya Killed Mayank on 29-06-2026",
+      "entities": [
+        {
+          "start": 0,
+          "end": 19,
+          "label": "SUSPECT",
+          "text": "Surya Killed Mayank"
+        },
+        {
+          "start": 23,
+          "end": 33,
+          "label": "DATE",
+          "text": "29-06-2026"
+        }
+      ]
+    },
+    {
+      "text": "mayank was killed by surya on 29.06.2026",
+      "entities": [
+        {
+          "start": 0,
+          "end": 6,
+          "label": "VICTIM",
+          "text": "mayank"
+        },
+        {
+          "start": 21,
+          "end": 26,
+          "label": "SUSPECT",
+          "text": "surya"
+        },
+        {
+          "start": 30,
+          "end": 40,
+          "label": "DATE",
+          "text": "29.06.2026"
+        }
+      ]
+    },
+    {
+      "text": "Chiamaka stole the wallet of Tenzin on 02/03/2026",
+      "entities": [
+        {
+          "start": 0,
+          "end": 8,
+          "label": "SUSPECT",
+          "text": "Chiamaka"
+        },
+        {
+          "start": 19,
+          "end": 25,
+          "label": "PROPERTY",
+          "text": "wallet"
+        },
+        {
+          "start": 29,
+          "end": 35,
+          "label": "VICTIM",
+          "text": "Tenzin"
+        },
+        {
+          "start": 39,
+          "end": 49,
+          "label": "DATE",
+          "text": "02/03/2026"
+        }
+      ]
+    },
+    {
+      "text": "Information is received today on 27.09.2026 at 22:15 hrs via a written complaint submitted by Shri Rajesh Kumar Sharma S/o Late Shri Ramesh Kumar Sharma, aged 41 years, R/o House No. 45, Pocket-B, Mayur Vihar Phase-2, New Delhi (Mobile: +91-9876543210), stating that today at around 20:30 hrs, while he was walking near Gate No. 3, Rajiv Chowk Metro Station, New Delhi, one unknown male youth aged about 22-25 years riding a black Splendor motorcycle without a number plate came from behind and forcibly snatched his office bag containing one black Lenovo LOQ gaming laptop (Serial No. R90XYZ12), important identity cards, and cash amounting to ₹3,500/-, causing him to fall and sustain minor injuries, after which the accused fled towards the Outer Circle. The statement has been read over and explained to the complainant, and upon disclosure of cognizable offences under Section 303(2) and 324(4) BNS, the present FIR is registered electronically at the police station. The original complaint is attached to the case file, and the investigation of the case is hereby entrusted to Sub-Inspector Amit Kumar.",
+      "entities": [
+        {
+          "start": 33,
+          "end": 43,
+          "label": "DATE",
+          "text": "27.09.2026"
+        },
+        {
+          "start": 47,
+          "end": 52,
+          "label": "TIME",
+          "text": "22:15"
+        },
+        {
+          "start": 99,
+          "end": 118,
+          "label": "VICTIM",
+          "text": "Rajesh Kumar Sharma"
+        },
+        {
+          "start": 173,
+          "end": 227,
+          "label": "LOCATION",
+          "text": "House No. 45, Pocket-B, Mayur Vihar Phase-2, New Delhi"
+        },
+        {
+          "start": 283,
+          "end": 288,
+          "label": "TIME",
+          "text": "20:30"
+        },
+        {
+          "start": 332,
+          "end": 368,
+          "label": "LOCATION",
+          "text": "Rajiv Chowk Metro Station, New Delhi"
+        },
+        {
+          "start": 374,
+          "end": 392,
+          "label": "SUSPECT",
+          "text": "unknown male youth"
+        },
+        {
+          "start": 425,
+          "end": 450,
+          "label": "PROPERTY",
+          "text": "black Splendor motorcycle"
+        },
+        {
+          "start": 517,
+          "end": 527,
+          "label": "PROPERTY",
+          "text": "office bag"
+        },
+        {
+          "start": 549,
+          "end": 573,
+          "label": "PROPERTY",
+          "text": "Lenovo LOQ gaming laptop"
+        },
+        {
+          "start": 607,
+          "end": 621,
+          "label": "PROPERTY",
+          "text": "identity cards"
+        },
+        {
+          "start": 627,
+          "end": 653,
+          "label": "PROPERTY",
+          "text": "cash amounting to ₹3,500/-"
+        },
+        {
+          "start": 744,
+          "end": 756,
+          "label": "LOCATION",
+          "text": "Outer Circle"
+        },
+        {
+          "start": 977,
+          "end": 995,
+          "label": "EVIDENCE",
+          "text": "original complaint"
+        }
+      ]
+    }
+  ]
+}

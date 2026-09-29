@@ -14,7 +14,7 @@ def main():
         browser = p.chromium.launch(channel="msedge", headless=True)
         page = browser.new_page(viewport={"width": 1440, "height": 1080}, device_scale_factor=1)
         page.on("pageerror", lambda error: errors.append(str(error)))
-        page.goto("http://127.0.0.1:8501", wait_until="domcontentloaded")
+        page.goto("http://127.0.0.1:8502", wait_until="domcontentloaded")
         page.get_by_role("heading", name="From narratives to insight", exact=True).wait_for(timeout=90000)
         page.wait_for_timeout(2000)
         page.screenshot(path=str(screenshots / "overview.png"), full_page=True)
@@ -22,6 +22,11 @@ def main():
         for name, title, shot in [("Case explorer", "Explore the case library", "case-explorer.png"), ("Narrative lab", "Read between the lines", "narrative-lab.png"), ("Model evaluation", "Measure what the models learn", "evaluation.png"), ("Topics", "Discover recurring language", "topics.png"), ("Pipeline & syllabus", "A traceable research pipeline", "pipeline.png"), ("Learning guide", "Understand the entire project", "learning-guide.png")]:
             page.get_by_text(name, exact=True).click()
             page.get_by_role("heading", name=title, exact=True).wait_for(timeout=90000)
+            if name == "Narrative lab":
+                page.get_by_label("Case narrative", exact=True).fill("rajiv hit sneha with a stick near pune")
+                page.get_by_role("button", name="Analyze narrative", exact=True).click()
+                page.get_by_test_id("stMetricValue").filter(has_text="Assault").first.wait_for(timeout=90000)
+                page.locator("mark").filter(has_text="sneha").wait_for(timeout=90000)
             page.wait_for_timeout(1500)
             assert page.locator('[data-testid="stException"]').count() == 0
             page.screenshot(path=str(screenshots / shot), full_page=True)
@@ -35,7 +40,8 @@ def main():
             page.goto(report.as_uri())
             page.pdf(path=str(ROOT / "docs" / "PROJECT_REPORT.pdf"), format="A4", print_background=True, margin={"top": "16mm", "bottom": "16mm", "left": "16mm", "right": "16mm"})
         browser.close()
-    result = {"status": "passed", "pages": visited, "javascript_errors": errors, "screenshots": str(screenshots)}
+    result = {"status": "passed", "pages": visited, "javascript_errors": errors, "screenshots": str(screenshots),
+              "informal_input": "rajiv hit sneha with a stick near pune", "informal_category": "Assault"}
     (ROOT / "artifacts" / "browser_check.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps(result))
 

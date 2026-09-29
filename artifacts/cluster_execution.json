@@ -3,7 +3,7 @@
   "master": "spark://127.0.0.1:17077",
   "workers": [
     {
-      "id": "worker-20260926221748-127.0.0.1-17101",
+      "id": "worker-20260929000610-127.0.0.1-17101",
       "host": "127.0.0.1",
       "port": 17101,
       "webuiaddress": "http://127.0.0.1:18081",
@@ -17,10 +17,10 @@
       "resourcesused": {},
       "resourcesfree": {},
       "state": "ALIVE",
-      "lastheartbeat": 1790441268977
+      "lastheartbeat": 1790620571192
     },
     {
-      "id": "worker-20260926221748-127.0.0.1-17102",
+      "id": "worker-20260929000610-127.0.0.1-17102",
       "host": "127.0.0.1",
       "port": 17102,
       "webuiaddress": "http://127.0.0.1:18082",
@@ -34,7 +34,7 @@
       "resourcesused": {},
       "resourcesfree": {},
       "state": "ALIVE",
-      "lastheartbeat": 1790441268944
+      "lastheartbeat": 1790620571192
     }
   ],
   "scope": "One physical Windows host; one master, two independent worker JVMs, two execution cores. Not a multi-host benchmark.",

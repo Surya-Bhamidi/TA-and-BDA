@@ -9,13 +9,13 @@
   "duplicates_removed": 1500,
   "clean_rows": 60000,
   "storage": "Spark-written Parquet partitioned by split",
-  "runtime_seconds": 32.24,
+  "runtime_seconds": 29.71,
   "mllib": {
     "model": "HashingTF + IDF + multinomial logistic regression",
-    "train_rows": 37512,
-    "test_rows": 7496,
-    "accuracy": 0.8748665955176094,
-    "weighted_f1": 0.8335249333196719
+    "train_rows": 39528,
+    "test_rows": 6824,
+    "accuracy": 0.7970398593200468,
+    "weighted_f1": 0.7894997806207134
   },
   "deployment_note": "Standalone Spark master and worker processes; see cluster_execution.json for verified workers and host scope."
 }

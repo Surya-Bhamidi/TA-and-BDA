@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, ENGLISH_STOP_WORDS
+from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import LatentDirichletAllocation, NMF
@@ -14,6 +14,7 @@ from sklearn.model_selection import GroupKFold, cross_val_score
 from .config import PROCESSED, MODELS, ARTIFACTS, CATEGORIES, ENTITY_LABELS, SEED, SETTINGS, write_json
 from .text import word_tokens, tokens_with_offsets, bio_labels, token_features
 from .evaluation import classification_metrics, entity_metrics, fit_temperature, temperature_scale, calibration_metrics
+from .features import robust_tfidf
 
 
 def sample_split(df, name, limit):
@@ -43,6 +44,13 @@ def sequence_data(part):
         features.append(token_features(tokens))
         labels.append(bio_labels(tokens, json.loads(row.entities_json)))
     return features, labels
+
+
+def entity_split(df, split, limit):
+    """Keep the existing corpus plus split-specific role/administrative cases."""
+    from .entity_corpus import extend_entity_split
+    base = sample_split(df, split, limit // 2)
+    return extend_entity_split(base, split, limit - len(base))
 
 
 def file_hash(path):
@@ -84,7 +92,9 @@ def train_topics(x_train):
             "interpretation": "Co-occurrence themes; names and routine words are reduced. Topics are not verified modus operandi."}
 
 
-def train_models(train_limit=6400, test_limit=1200, validation_limit=800, bert_epochs=4):
+def train_models(train_limit=12000, test_limit=1200, validation_limit=800, bert_epochs=4):
+    from threadpoolctl import threadpool_limits
+    threadpool_limits(4)
     from gensim.models import Word2Vec
     import sklearn_crfsuite
     from .bert_model import fit_bert, predict_bert
@@ -96,7 +106,7 @@ def train_models(train_limit=6400, test_limit=1200, validation_limit=800, bert_e
     assert all(not groups[a] & groups[b] for a in split_names for b in split_names if a != b)
     train, validation, development = (sample_split(df, name, limit) for name, limit in [("train", train_limit), ("validation", validation_limit), ("development", validation_limit)])
     plan = {"seed": SEED, "train_rows": len(train), "validation_rows": len(validation), "development_rows": len(development),
-            "test_rows": min(test_limit, len(df[df.split == "test"])), "split": "V2 incident groups, participant phrasings and first-name pools fixed before fitting",
+            "test_rows": min(test_limit, len(df[df.split == "test"])), "split": "V3 formal + informal event groups and name/place pools fixed before fitting",
             "groups": {k: sorted(v) for k, v in groups.items()}, "selection": "Validation only; final predictions after model hashes are frozen",
             "limitations": "Synthetic composite templates share grammar and vocabulary; this is not external real-world validation."}
     write_json(ARTIFACTS / "evaluation_plan.json", plan)
@@ -105,7 +115,7 @@ def train_models(train_limit=6400, test_limit=1200, validation_limit=800, bert_e
     x, y = train.narrative.tolist(), train.crime_type.tolist()
     fitted, timing = {}, {}
     for name, vectorizer in [("Bag of Words", CountVectorizer(max_features=12000, ngram_range=(1, 2), min_df=2)),
-                            ("TF-IDF", TfidfVectorizer(max_features=12000, ngram_range=(1, 2), min_df=2, sublinear_tf=True))]:
+                            ("TF-IDF", robust_tfidf())]:
         started = time.perf_counter()
         model = Pipeline([("vectorizer", vectorizer), ("classifier", LogisticRegression(max_iter=500, random_state=SEED))]).fit(x, y)
         timing[name] = time.perf_counter() - started
@@ -124,8 +134,8 @@ def train_models(train_limit=6400, test_limit=1200, validation_limit=800, bert_e
     timing["Word2Vec"] = time.perf_counter() - started
     _, bert_details = fit_bert(x, y, validation.narrative.tolist(), validation.crime_type.tolist(), development.narrative.tolist(), epochs=bert_epochs)
     print("Training CRF and BERT entity taggers, selecting on validation...", flush=True)
-    ner_train = sample_split(df, "train", SETTINGS["training"]["ner_train_limit"])
-    ner_val = sample_split(df, "validation", min(400, validation_limit))
+    ner_train = entity_split(df, "train", SETTINGS["training"]["ner_train_limit"])
+    ner_val = entity_split(df, "validation", min(400, validation_limit))
     train_x, train_y = sequence_data(ner_train)
     val_x, val_y = sequence_data(ner_val)
     crf = sklearn_crfsuite.CRF(algorithm="lbfgs", c1=.1, c2=.1, max_iterations=100, all_possible_transitions=True).fit(train_x, train_y)
@@ -158,7 +168,7 @@ def train_models(train_limit=6400, test_limit=1200, validation_limit=800, bert_e
     errors["prediction"], errors["characters"] = guesses["TF-IDF"], test.narrative.str.len()
     errors[errors.crime_type != errors.prediction].to_csv(ARTIFACTS / "classification_errors.csv", index=False)
     write_json(ARTIFACTS / "evaluation.json", results)
-    ner_test = sample_split(df, "test", min(600, test_limit))
+    ner_test = entity_split(df, "test", min(600, test_limit))
     final_x, final_y = sequence_data(ner_test)
     crf_metrics = entity_metrics(final_y, crf.predict(final_x))
     ner_bert, ner_tokenizer = load_ner()
@@ -168,7 +178,7 @@ def train_models(train_limit=6400, test_limit=1200, validation_limit=800, bert_e
     selected = bert_metrics if selected_ner == "BERT" else crf_metrics
     write_json(ARTIFACTS / "ner_evaluation.json", {**selected, "model": selected_ner, "labels": ENTITY_LABELS, "train_rows": len(ner_train), "validation_rows": len(ner_val), "test_rows": len(ner_test),
                "models": {"CRF": crf_metrics, "BERT": bert_metrics}, "validation": {"CRF": crf_validation["strict_entity_f1"], "BERT": ner_details["validation_f1"]},
-               "bert_history": ner_details["history"], "split": "V2 final held-out incident and participant patterns; models fixed before scoring"})
+               "bert_history": ner_details["history"], "split": "V3 held-out event patterns and name/place pools; models fixed before scoring"})
     from .topics import topic_input
     bundle = joblib.load(MODELS / "topics.joblib")
     topic_metrics["held_out_perplexity"] = float(bundle["model"].perplexity(bundle["vectorizer"].transform(topic_input(test.narrative.tolist()))))

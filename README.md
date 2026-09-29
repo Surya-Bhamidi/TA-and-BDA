@@ -1,6 +1,10 @@
 # Decoding Crime Narratives using NLP and Big Data Analytics
 
-**Version 2** is a complete university project with 60,000 fictional reports, Apache Spark, four document classifiers, CRF and BERT entity extraction, LDA/NMF topics, semantic search, spaCy syntax, VADER polarity, TextRank summaries and a seven-page Streamlit dashboard.
+**Version 3.1** improves informal English, misspellings, unfamiliar names, ownership roles and FIR-style administrative context using the project's existing algorithms. It includes 60,000 fictional reports, Apache Spark, four document classifiers, CRF and BERT entity extraction, LDA/NMF topics, semantic search, spaCy syntax, VADER polarity, TextRank summaries and a seven-page Streamlit dashboard.
+
+The [entity and text-fidelity revision](docs/ENTITY_CONTEXT_V3_1.md) addresses the reported short-sentence and long-FIR failures, including relatives/officers versus actual parties, punctuation, dotted dates and property lists. Model weights are in `artifacts/models/v3_1`; prior releases are retained.
+
+Open **Narrative lab** and try `sir my moblie stoln from pocket in bus ystrday` or `José García hit Wei Zhang with iron rod near Nairobi`. Original spelling and entity offsets are preserved. See [the robustness update](docs/ROBUSTNESS_V3.md) for the constraints, evidence and remaining limits.
 
 ## Start here
 
@@ -16,7 +20,7 @@ Read the [beginner guide](docs/BEGINNER_GUIDE.md), then the [complete project re
 
 ## Open the completed local project
 
-Run **START_DASHBOARD.cmd**, then open **http://localhost:8501**. Alternatively, from this folder:
+Run **START_DASHBOARD.cmd**, then open **http://localhost:8502**. Alternatively, from this folder:
 
 ```powershell
 .\.venv312\Scripts\python.exe -m streamlit run app.py
@@ -57,7 +61,7 @@ Generate JSONL -> Spark clean/deduplicate -> partitioned Parquet
 
 Spark processes all 60,000 clean reports. NLP training uses bounded driver-side samples, and enrichment runs in Python batches. The overview reads metadata; selected full narratives come from SQLite.
 
-Version 2 was verified using a standalone master and **two worker processes on one physical host**. It is not a multi-machine scalability benchmark. The default pipeline uses local[2].
+Version 3 was verified using a standalone master and **two worker processes on one physical host**. It is not a multi-machine scalability benchmark. The default pipeline uses local[2].
 
 ```powershell
 # Separate stages
@@ -78,12 +82,12 @@ Version 2 was verified using a standalone master and **two worker processes on o
 
 Stop the dashboard before rebuilding. Changing an upstream stage requires downstream rebuilding. Resume is conservative: source changes invalidate recorded stages. settings.toml centralizes defaults; run receipts and stage hashes document execution.
 
-## What Version 2 adds
+## Included capabilities
 
 | Area | Implementation |
 |---|---|
-| Data | 384 composite scenario groups, varied layouts, unknown/multiple participants, eight entity types |
-| Document models | BoW, TF-IDF, neural Word2Vec averaging and fine-tuned two-layer BERT |
+| Data | 528 scenario groups; formal and informal English, real typo edits, international names/places, eight entity types |
+| Document models | BoW, word + character TF-IDF, neural Word2Vec averaging and fine-tuned two-layer BERT |
 | Entity models | CRF and BERT BIO tagging; validation-selected default |
 | Topics | Lemmatized content words, LDA perplexity/coherence/diversity and NMF top terms |
 | Evaluation | Four splits, grouped training CV, frozen hashes, bootstrap intervals, calibration and review flags |
@@ -95,11 +99,11 @@ Stop the dashboard before rebuilding. Changing an upstream stage requires downst
 
 ## Read the scores correctly
 
-Document models use 6,400 training, 800 validation, 800 development and 1,200 final-test examples. NER uses 3,200 training, 400 validation and 600 final-test examples. Incident variants, participant phrasings and first-name pools are split-specific; grammar and vocabulary remain shared.
+Document models use 12,000 training, 800 validation, 800 development and 1,200 final-test examples. NER uses 8,000 training, 400 validation and 600 final-test examples. Event variants and name/place pools are split before fitting; grammar and vocabulary remain shared. See the manifest for separate formal and informal split policies.
 
-Vectorizers and Word2Vec fit on training only. Validation selects checkpoints and fits temperature. Model hashes are frozen before final predictions. TF-IDF remains the dashboard category model for speed and explanations; it is not advertised as the highest-scoring model. CRF wins the entity-model validation comparison in this release.
+Vectorizers and Word2Vec fit on training only. Validation selects checkpoints and fits temperature. Model hashes are frozen before final predictions. TF-IDF remains the dashboard category model for speed and explanations. The Automatic entity model comes from the saved validation comparison.
 
-V1 artifacts are archived under artifacts/baselines/v1. V1 and V2 have different data/protocols, so score changes do not isolate an algorithmic improvement. No human-reference accuracy is claimed for syntax, polarity, threat cues, retrieval or summaries. Synthetic trends are not real crime rates.
+V1 and V2 artifacts are archived under artifacts/baselines. Versions use different data/protocols, so their benchmark scores are not direct improvement estimates. `python scripts/check_robustness.py` compares the retained V2 models and V3 on the same hand-written development examples. Those examples informed development and are not an independent final benchmark. No human-reference accuracy is claimed for syntax, polarity, threat cues, retrieval or summaries. Synthetic trends are not real crime rates.
 
 ## External JSONL staging
 

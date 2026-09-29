@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "release": "3.1.0",
+  "screenshots": "C:\\Users\\bhara\\OneDrive\\Desktop\\TA AND BDA - Copy\\Final Project\\docs\\screenshots",
+  "cases": [
+    {
+      "case": 1,
+      "exact_entities": true,
+      "exact_source_text": true
+    },
+    {
+      "case": 2,
+      "exact_entities": true,
+      "exact_source_text": true
+    },
+    {
+      "case": 5,
+      "exact_entities": true,
+      "exact_source_text": true
+    }
+  ],
+  "literal_characters_and_line_breaks": true
+}

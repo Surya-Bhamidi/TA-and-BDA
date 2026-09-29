@@ -7,7 +7,7 @@ object CrimeAnalytics {
   case class CaseRecord(report_id: String, narrative: String, crime_type: String)
   trait TextTransform { def apply(text: String): String }
   object Normalize extends TextTransform {
-    override def apply(text: String): String = text.toLowerCase.replaceAll("\\s+", " ").trim
+    override def apply(text: String): String = text.toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+", " ").trim
   }
   def categoryFamily(category: String): String = category match {
     case "Cybercrime" | "Fraud" => "Digital / financial"
@@ -23,13 +23,13 @@ object CrimeAnalytics {
       val reports: Dataset[CaseRecord] = spark.read.parquet(args(0))
         .select("report_id", "narrative", "crime_type").as[CaseRecord]
       // Immutable case classes, higher-order functions, closures and typed collections.
-      val minimumLength = 20
-      val cleaned = reports.filter(_.narrative.length >= minimumLength)
+      val minimumLength = 1 // Short informal reports are valid too.
+      val cleaned = reports.filter(_.narrative.trim.length >= minimumLength)
         .map(r => r.copy(narrative = Normalize(r.narrative)))
       val familyCounts = cleaned.map(r => categoryFamily(r.crime_type))
         .groupBy("value").count().orderBy(desc("count"))
       val stopwords = Set("the", "a", "an", "and", "of", "to", "was", "in")
-      val wordCounts = cleaned.flatMap(_.narrative.split("\\W+").toSeq)
+      val wordCounts = cleaned.flatMap(_.narrative.split("[^\\p{L}\\p{N}]+").toSeq)
         .filter(w => w.length > 2 && !stopwords.contains(w))
         .groupBy("value").count().orderBy(desc("count"))
       println(s"SCALA_VALID_REPORTS=${cleaned.count()}")

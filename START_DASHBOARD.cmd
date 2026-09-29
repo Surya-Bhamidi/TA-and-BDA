@@ -5,6 +5,6 @@ if not exist ".venv312\Scripts\python.exe" (
   pause
   exit /b 1
 )
-echo Open http://localhost:8501 in your browser.
-".venv312\Scripts\python.exe" -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501
+echo Open http://localhost:8502 in your browser for this corrected project copy.
+".venv312\Scripts\python.exe" -m streamlit run app.py --server.address 127.0.0.1 --server.port 8502
 pause

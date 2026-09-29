@@ -1,5 +1,9 @@
 # Decoding Crime Narratives using NLP and Big Data Analytics
-## A complete beginner's project report — Version 2
+## A complete beginner's project report — Version 3.1
+
+The 3.1 entity revision adds generated ownership, active/passive violence and FIR-style administrative contexts to CRF/BERT training, fixes shared punctuation boundaries and preserves exact displayed characters. See ENTITY_CONTEXT_V3_1.md. The NER evaluation now mixes a previously viewed V3 subset with generated context examples; its scope differs from the unchanged document-model benchmark.
+
+Version 3 adds informal English and spelling variation within the original algorithms. Read ROBUSTNESS_V3.md for the precise changes, development challenges and limits. The measured appendix contains the current results; the explicitly labeled V2 discussion is historical.
 
 ### How to read this report
 
@@ -55,7 +59,7 @@ Most expensive processing happens before the browser opens. This is a batch syst
 
 The project deliberately generates its own dataset, which is allowed by the project requirements. It does not silently substitute synthetic text for an alleged real-world download.
 
-There are eight balanced categories: Assault, Arson, Burglary, Cybercrime, Fraud, Robbery, Theft and Vandalism. Names, places, events and dates are fictional. The generator produces 60,000 valid unique examples, then injects known faults so cleaning can be checked:
+There are eight balanced categories: Assault, Arson, Burglary, Cybercrime, Fraud, Robbery, Theft and Vandalism. Events and roles are fictional. Place vocabulary includes real international cities; no event is a claim about those cities or any actual person. The generator produces 60,000 valid unique examples, then injects known faults so cleaning can be checked:
 
 | Injected condition | Rows | Why include it? |
 |---|---:|---|
@@ -65,9 +69,9 @@ There are eight balanced categories: Assault, Arson, Burglary, Cybercrime, Fraud
 | Invalid dates | 300 | Check date parsing |
 | Total raw rows | 62,700 | Input to Spark |
 
-Version 2 combines 8 categories, 8 incident variants and 6 sentence layouts into **384 composite scenario groups**. This does not mean 384 independently authored stories. Many words and grammar patterns remain shared.
+Version 3 includes **528 scenario groups**: 384 formal composite groups and 144 informal event groups. There are 12,000 formal reports and 48,000 informal reports. Informal inputs include short fragments, Indian English phrasings, actual misspellings, omitted function words, irregular spacing and varied casing. These are generated groups, not independently authored stories. Many words and grammar patterns remain shared.
 
-Participant phrases and first-name pools differ by split. Some stories have an unidentified suspect, multiple suspects, multiple victims, negated weapon mentions, spelling noise or extra follow-up sentences. These variations help expose weaknesses hidden by one repetitive sentence format.
+Formal participant phrases and first-name pools differ by split. Informal event patterns, full-name pools and place pools differ by split; randomly invented names add unfamiliar surfaces. All noise variants of an event remain in its assigned split. Normalized duplicates are rejected across all splits. Some formal stories also have unidentified suspects, multiple participants and negated weapons. Original source spans remain exact through every training-text edit.
 
 ### A record and its fields
 
@@ -118,7 +122,7 @@ A **shuffle** redistributes records across executors. Deduplication and grouped 
 
 ### What was actually executed?
 
-Version 2 was run against a standalone master and **two worker processes on this one Windows computer**. The run processed all 60,000 clean reports. `artifacts/cluster_execution.json` records worker registration and completion; `spark_metrics.json` records the actual master and counts. `spark_execution_plan.txt` exposes the physical plan.
+Version 3 was run against a standalone master and **two worker processes on this one Windows computer**. The run processed all 60,000 clean reports. `artifacts/cluster_execution.json` records worker registration and completion; `spark_metrics.json` records the actual master and counts. `spark_execution_plan.txt` exposes the physical plan.
 
 This is separate-worker execution on one host, not proof of multi-machine scalability, fault tolerance under machine failure, or an HDFS deployment. The default simpler reproduction uses `local[2]`, which runs local Spark tasks without a separate master.
 
@@ -164,6 +168,8 @@ In a corpus of 100 documents, a word appearing in 99 has IDF about 1.01; a word 
 
 The vocabulary and IDF are fitted on training text only. Fitting them on the test set would leak information about the evaluation distribution.
 
+Version 3 combines word unigrams/bigrams with character 3–5-grams in the same TF-IDF representation and logistic regression model. A typo can lose its whole-word match while retaining useful character fragments. Character features receive weight 0.75 relative to the word branch. This does not autocorrect the source and does not introduce a new classification algorithm. Keyword search continues to use the word branch so a misspelled string cannot become an unexplained exact-keyword match.
+
 ### 6.3 Neural Word2Vec embeddings
 
 Word2Vec is a small neural model trained to learn contextual relationships between words. This project uses Gensim skip-gram with 100-dimensional vectors, trained on its training partition. A document vector is the average of its known word vectors, followed by logistic regression.
@@ -200,6 +206,8 @@ B means beginning, I means inside the same entity, and O means outside an entity
 
 A Conditional Random Field learns relationships between nearby labels and features such as capitalization, neighboring words, position and sentence context. It can learn that a name after a reporting phrase often describes a victim, while a name after an identification phrase may be a suspect. These are learned patterns, not guaranteed rules.
 
+Version 3 uses a four-token lexical window on each side plus word shape and distances to action, role and preposition cues within eight tokens. Training includes lowercase and invented names, active/passive constructions and varied name lengths. Cue observations do not directly assign roles: the same linear-chain CRF learns their weights. No inference-time name or country list is used.
+
 ### BERT token classifier
 
 A second model fine-tunes BERT to predict BIO labels. BERT may split one word into multiple subwords; only the first subword receives a training label and other pieces use the ignored loss value -100. Predictions are mapped back to original words.
@@ -208,7 +216,7 @@ Overlapping windows reduce boundary losses in long cases. Probabilities for repe
 
 ### Which model is shown?
 
-Both models are trained and scored on validation. The higher validation strict span F1 wins; ties prefer the faster CRF. In the executed V2 run, CRF is selected. Users can explicitly compare both in Narrative Lab. Model choice is not changed after inspecting final-test scores.
+Both models are trained and scored on validation. The higher validation strict span F1 wins; ties prefer the faster CRF. The current selection is saved in the model folder and shown in the dashboard. Users can explicitly compare both in Narrative Lab. Model choice is not changed after inspecting final-test scores.
 
 A short preceding-word heuristic marks mentions such as “No knife” as negated. It is not full logical reasoning and may mishandle complicated negation or quoted allegations. Entity confidence is a model score, not verified factual confidence.
 
@@ -246,20 +254,20 @@ Hybrid search combines keyword and semantic **ranks**, using reciprocal-rank fus
 
 For a question within a case, the app retrieves up to two matching source sentences, displays the report ID and sentence numbers, and returns “Insufficient evidence” below its threshold. This is evidence retrieval, not a general conversational assistant or verified question-answering model. A retrieved sentence may be relevant without answering the question.
 
-TF-IDF prediction explanations show positively contributing word features. They describe correlations in a linear classifier, not causal reasons why a crime occurred.
+TF-IDF prediction explanations show positively contributing words, phrases and character fragments, with their feature type. They describe correlations in a linear classifier, not causal reasons why a crime occurred.
 
 ## 10. Evaluation: how to judge the results honestly
 
 ### Four data roles
 
-| Split | Use | V2 sample for document models |
+| Split | Use | V3 sample for document models |
 |---|---|---:|
-| Training | Fit parameters and feature vocabulary | 6,400 |
+| Training | Fit parameters and feature vocabulary | 12,000 |
 | Validation | Select checkpoints and fit temperature | 800 |
 | Development | Separate diagnostic reporting | 800 |
 | Final test | Score frozen models | 1,200 |
 
-The complete corpus has larger split partitions. These samples keep the CPU experiment practical. NER uses its own documented subsets: 3,200 training reports, 400 validation reports and 600 final-test reports.
+The complete corpus has larger split partitions. These samples keep the CPU experiment practical. NER uses its own documented subsets: 8,000 training reports, 400 validation reports and 600 final-test reports.
 
 Incident variants, participant phrasings and first-name pools are assigned before fitting. Composite groups do not overlap between splits. Three-fold grouped cross-validation of TF-IDF uses incident variants within training, keeping related layouts together.
 
@@ -285,13 +293,13 @@ A score of 0.9 is useful only if similarly scored predictions are correct roughl
 
 Expected Calibration Error (ECE) compares average confidence with accuracy in bins. Lower is generally better under the same evaluation. Calibration can become worse when the data distribution changes, so before/after results are reported honestly.
 
-Predictions below the configured 0.60 score are marked for review. Coverage is the fraction above that threshold. Accuracy among accepted predictions must be read alongside coverage: accepting very few easy cases can inflate that accuracy.
+Predictions below the configured 0.60 score are marked for review. The app also flags fewer than three words, low training-vocabulary coverage, raw confidence below 0.45 or a raw top-two margin below 0.15. These are transparent heuristics, not a separate model. Reported calibration coverage measures only the 0.60 calibrated-score threshold, not the combined UI policy. Accuracy among accepted predictions must be read alongside coverage: accepting very few easy cases can inflate that accuracy.
 
 ### Comparing versions
 
 V1 artifacts are retained in `artifacts/baselines/v1/`. V2 changes the corpus, entities, splits and training protocol. A higher V2 NER score therefore does not isolate the benefit of one algorithm. It is not an apples-to-apples causal improvement claim. The measured appendix gives all current model scores, including disappointing results.
 
-### What the executed V2 results teach us
+### Historical V2 results (archived; not the current benchmark)
 
 Word2Vec document classification reaches 95.17% accuracy on the fixed final sample, compared with 83.67% for TF-IDF and 83.25% for compact BERT. This is evidence about this particular experiment, not a universal model ranking.
 
@@ -325,7 +333,7 @@ User-submitted text is analyzed in memory. Saving a correction is an explicit ac
 
 ### On the completed development computer
 
-Open the project folder, run `START_DASHBOARD.cmd`, and visit http://localhost:8501. Read the root README, not `.pytest_cache/README.md`: that cache file belongs to the testing tool.
+Open the project folder, run `START_DASHBOARD.cmd`, and visit http://localhost:8502. Read the root README, not `.pytest_cache/README.md`: that cache file belongs to the testing tool.
 
 ### A fresh Windows installation
 
@@ -413,7 +421,11 @@ BERT and CRF are chosen from the requested alternatives. GPT, HMM, machine trans
 
 Run `python scripts/run_scala.py` inside the environment to execute the Scala example against the processed data. The report does not imply that the main Python dashboard was rewritten in Scala.
 
-## 15. What improved in Version 2?
+## 15. What improved across versions?
+
+Version 3 broadens the data to informal English and international names, preserves spans through real noise edits, uses word and character TF-IDF in the existing classifier, expands the CRF context features and retrains the original model families. It adds direct name/role checks, explicit input-quality review reasons and a hand-written development comparison against retained V2 weights. ROBUSTNESS_V3.md documents the constraints and remaining limits. No external spell checker, translation service or new model family was added.
+
+The earlier Version 2 changes are retained:
 
 The upgrade adds varied composite scenarios, eight entity types, a separately fine-tuned BERT entity tagger, validation-based tagger selection, a final-test freeze receipt, grouped cross-validation, bootstrap intervals, calibration and review flags.
 

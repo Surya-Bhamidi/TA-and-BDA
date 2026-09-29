@@ -10,7 +10,7 @@ DATA = ROOT / "data"
 RAW = DATA / "raw" / "reports.jsonl"
 PROCESSED = DATA / "processed"
 ARTIFACTS = ROOT / "artifacts"
-MODELS = ARTIFACTS / "models" / "v2"
+MODELS = ARTIFACTS / "models" / "v3_1"
 RUNTIME = ROOT / ".runtime"
 SEED = 42
 with (ROOT / "settings.toml").open("rb") as settings_file:

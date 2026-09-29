@@ -1,0 +1,33 @@
+{
+  "raw_rows": 62700,
+  "clean_rows": 60000,
+  "invalid_removed": 1200,
+  "duplicates_removed": 1500,
+  "null_narratives": 600,
+  "blank_narratives": 300,
+  "schema": "struct<report_id:string,narrative:string,crime_type:string,reported_at:string,district:string,template_group:string,split:string,source:string,entities_json:string,event_time:timestamp,clean_text:string,text_hash:string,month:string>",
+  "length_quantiles": [
+    285.0,
+    362.0,
+    409.0,
+    609.0,
+    910.0
+  ],
+  "split_counts": {
+    "test": 7496,
+    "validation": 7496,
+    "development": 7496,
+    "train": 37512
+  },
+  "category_counts": {
+    "Fraud": 7500,
+    "Theft": 7500,
+    "Cybercrime": 7500,
+    "Vandalism": 7500,
+    "Assault": 7500,
+    "Burglary": 7500,
+    "Arson": 7500,
+    "Robbery": 7500
+  },
+  "lineage": "report_id + source + SHA-256 normalized text hash retained from raw JSONL through Parquet and dashboard"
+}

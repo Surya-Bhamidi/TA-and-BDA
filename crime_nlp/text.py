@@ -3,7 +3,30 @@ import re
 import numpy as np
 
 TOKEN_RE = re.compile(r"\w+|[^\w\s]", re.UNICODE)
-WORD_RE = re.compile(r"[a-zA-Z]{2,}")
+WORD_RE = re.compile(r"[^\W\d_]{2,}", re.UNICODE)
+
+# Shared CRF context observations, not rules that assign entity labels. The
+# same cues are used for every name, spelling, casing and country.
+ROLE_ACTIONS = set("hit hits hitting beat beats beaten beating punch punched slap slapped kick kicked attack attacked stab stabbed strike struck steal stole stolen rob robbed cheat cheated trick tricked hack hacked threaten threatened snatch snatched grab grabbed damage damaged burn burned burnt torch torched deface defaced force forced".split())
+ROLE_ACTIONS.update("kill killed killing murder murdered shoot shot shooting assault assaulted taken took".split())
+
+ABBREVIATIONS = {"mr", "mrs", "ms", "dr", "shri", "smt", "no", "nos", "sr", "jr", "st", "hrs", "approx", "etc"}
+
+
+def sentence_break(tokens, index):
+    """A dot in dates, initials and administrative abbreviations isn't a stop."""
+    current = tokens[index]
+    if current["text"] in {"!", "?"}:
+        return True
+    if current["text"] != ".":
+        return False
+    before = tokens[index - 1]["text"] if index else ""
+    after = tokens[index + 1]["text"] if index + 1 < len(tokens) else ""
+    if before.isdigit() and after.isdigit() and tokens[index - 1]["end"] == current["start"] and current["end"] == tokens[index + 1]["start"]:
+        return False
+    if before.lower() in ABBREVIATIONS or (len(before) == 1 and before.isalpha()):
+        return False
+    return True
 
 
 def word_tokens(text):
@@ -31,9 +54,10 @@ def token_features(tokens):
     # observations learned by the CRF, not post-hoc assignments of entity labels.
     # They allow role words to be separated from names by modifiers or clauses.
     contexts = [{} for _ in tokens]
+    lowered = [t["text"].lower() for t in tokens]
     start = 0
     for end in range(len(tokens)):
-        if tokens[end]["text"] in {".", "!", "?"} or end == len(tokens) - 1:
+        if sentence_break(tokens, end) or end == len(tokens) - 1:
             words = {t["text"].lower() for t in tokens[start:end + 1]}
             cues = {"sentence:victim_cue": bool(words & {"victim", "complainant"}),
                     "sentence:suspect_cue": bool(words & {"suspect", "offender", "assailant", "responsible"})}
@@ -44,16 +68,41 @@ def token_features(tokens):
     for i, token in enumerate(tokens):
         word = token["text"]
         f = {"bias": 1., "lower": word.lower(), "suffix3": word[-3:].lower(), "suffix2": word[-2:].lower(),
-             "title": word.istitle(), "upper": word.isupper(), "digit": word.isdigit(), "punct": not word.isalnum()}
+             "title": word.istitle(), "upper": word.isupper(), "digit": word.isdigit(), "punct": not word.isalnum(),
+             "prefix2": word[:2].lower(), "prefix3": word[:3].lower(), "alpha": word.isalpha(),
+             "length": min(len(word), 15), "shape": re.sub(r"a+", "a", re.sub(r"[^\W\d_]", "a", word.lower())),
+             "action_word": word.lower() in ROLE_ACTIONS,
+             "BOS": i == 0, "EOS": i == len(tokens) - 1}
         f.update(contexts[i])
-        for offset in [-2, -1, 1, 2]:
+        # Wider lexical context distinguishes "A hit B" / "A was hit by B"
+        # while staying a linear-chain CRF with hand-designed observations.
+        for offset in [-4, -3, -2, -1, 1, 2, 3, 4]:
             j = i + offset
             if 0 <= j < len(tokens):
                 other = tokens[j]["text"]
                 f[f"{offset}:lower"] = other.lower()
                 f[f"{offset}:title"] = other.istitle()
+                f[f"{offset}:digit"] = other.isdigit()
             else:
                 f[f"{offset}:boundary"] = True
+        f["previous_pair"] = "|".join(lowered[max(0, i - 2):i])
+        f["next_pair"] = "|".join(lowered[i + 1:i + 3])
+        for side, step in [("left", -1), ("right", 1)]:
+            # A compact cue-distance observation transfers the same relationship
+            # from a multiword name to an unseen lowercase mononym.
+            found = set()
+            for distance in range(1, 9):
+                j = i + step * distance
+                if not 0 <= j < len(tokens) or lowered[j] == ";" or sentence_break(tokens, j):
+                    break
+                cue = lowered[j]
+                kinds = {"action": cue in ROLE_ACTIONS, "place": cue in {"near", "at", "in", "outside"},
+                         "by": cue == "by", "victim": cue in {"victim", "complainant"},
+                         "suspect": cue in {"suspect", "accused", "offender"}}
+                for kind, present in kinds.items():
+                    if present and kind not in found:
+                        f[f"{side}:{kind}:distance"] = str(distance)
+                        found.add(kind)
         result.append(f)
     return result
 
@@ -76,7 +125,17 @@ def spans_from_bio(text, tokens, labels):
 
 
 def sentences(text):
-    return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
+    tokens = tokens_with_offsets(text)
+    result, start = [], 0
+    for i, token in enumerate(tokens):
+        end = token["end"]
+        if sentence_break(tokens, i) and (end == len(text) or text[end].isspace()):
+            if text[start:end].strip():
+                result.append(text[start:end].strip())
+            start = end
+    if text[start:].strip():
+        result.append(text[start:].strip())
+    return result
 
 
 def summarize(text, count=2):

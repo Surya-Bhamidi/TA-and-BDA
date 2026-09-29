@@ -1,11 +1,14 @@
 {
   "rows": 60000,
-  "seconds": 846.44,
+  "seconds": 424.99,
   "batch_size": 1000,
   "classification": "TF-IDF logistic regression + validation temperature calibration",
   "entities": "CRF predictions",
   "sentiment": "NLTK VADER compound polarity; not an independently validated threat score",
   "threat": "Separate transparent cue heuristic, not calibrated risk",
   "topics": "LDA",
-  "syntax_and_summary": "spaCy morphology/POS/dependencies and TextRank are computed on demand in the dashboard"
+  "syntax_and_summary": "spaCy morphology/POS/dependencies and TextRank are computed on demand in the dashboard",
+  "entity_refresh_seconds": 40.89,
+  "entity_model_version": "3.1.0",
+  "entity_model_sha256": "7aa73d13366ff30fb640227a87b8f0c92112369411ecc45bb2acfcb948f486d8"
 }

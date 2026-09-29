@@ -39,3 +39,23 @@ def test_hybrid_search_and_pagination():
     assert not app.exception
     assert app.number_input[0].value == 1
     assert len(app.dataframe) > 0
+
+
+def test_informal_input_review_and_stale_result_handling():
+    from streamlit.testing.v1 import AppTest
+    app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=180).run()
+    app.sidebar.radio[0].set_value("Narrative lab").run()
+    app.checkbox[0].uncheck().run()
+    app.text_area[0].set_value("sir my moblie stoln from pocket in bus ystrday").run()
+    app.button[0].click().run()
+    assert not app.exception
+    assert app.metric[0].value == "Theft"
+    app.text_area[0].set_value("please help").run()
+    assert any("text has changed" in item.value for item in app.info)
+    app.button[0].click().run()
+    assert not app.exception
+    assert any("Needs review" in item.value for item in app.warning)
+    app.text_area[0].set_value("12345").run()
+    app.button[0].click().run()
+    assert not app.exception
+    assert any("plain-text description" in item.value for item in app.warning)

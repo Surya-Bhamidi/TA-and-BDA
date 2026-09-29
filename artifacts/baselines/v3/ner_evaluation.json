@@ -1,0 +1,261 @@
+{
+  "strict_entity_f1": 0.9140791152700979,
+  "report": {
+    "DATE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 290
+    },
+    "EVIDENCE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 205
+    },
+    "LOCATION": {
+      "precision": 0.9975429975429976,
+      "recall": 0.8826086956521739,
+      "f1-score": 0.9365628604382928,
+      "support": 460
+    },
+    "PROPERTY": {
+      "precision": 0.8503401360544217,
+      "recall": 0.628140703517588,
+      "f1-score": 0.7225433526011561,
+      "support": 199
+    },
+    "SUSPECT": {
+      "precision": 0.8447058823529412,
+      "recall": 0.8713592233009708,
+      "f1-score": 0.8578255675029869,
+      "support": 412
+    },
+    "TIME": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 290
+    },
+    "VICTIM": {
+      "precision": 0.9264305177111717,
+      "recall": 0.7606263982102909,
+      "f1-score": 0.8353808353808355,
+      "support": 447
+    },
+    "WEAPON": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 134
+    },
+    "micro avg": {
+      "precision": 0.9487858719646799,
+      "recall": 0.8818219121871153,
+      "f1-score": 0.9140791152700979,
+      "support": 2437
+    },
+    "macro avg": {
+      "precision": 0.9523774417076916,
+      "recall": 0.8928418775851279,
+      "f1-score": 0.9190390769904089,
+      "support": 2437
+    },
+    "weighted avg": {
+      "precision": 0.9475669802588897,
+      "recall": 0.8818219121871153,
+      "f1-score": 0.9111384530963106,
+      "support": 2437
+    }
+  },
+  "model": "CRF",
+  "labels": [
+    "SUSPECT",
+    "VICTIM",
+    "LOCATION",
+    "WEAPON",
+    "PROPERTY",
+    "DATE",
+    "TIME",
+    "EVIDENCE"
+  ],
+  "train_rows": 8000,
+  "validation_rows": 400,
+  "test_rows": 600,
+  "models": {
+    "CRF": {
+      "strict_entity_f1": 0.9140791152700979,
+      "report": {
+        "DATE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 290
+        },
+        "EVIDENCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 205
+        },
+        "LOCATION": {
+          "precision": 0.9975429975429976,
+          "recall": 0.8826086956521739,
+          "f1-score": 0.9365628604382928,
+          "support": 460
+        },
+        "PROPERTY": {
+          "precision": 0.8503401360544217,
+          "recall": 0.628140703517588,
+          "f1-score": 0.7225433526011561,
+          "support": 199
+        },
+        "SUSPECT": {
+          "precision": 0.8447058823529412,
+          "recall": 0.8713592233009708,
+          "f1-score": 0.8578255675029869,
+          "support": 412
+        },
+        "TIME": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 290
+        },
+        "VICTIM": {
+          "precision": 0.9264305177111717,
+          "recall": 0.7606263982102909,
+          "f1-score": 0.8353808353808355,
+          "support": 447
+        },
+        "WEAPON": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 134
+        },
+        "micro avg": {
+          "precision": 0.9487858719646799,
+          "recall": 0.8818219121871153,
+          "f1-score": 0.9140791152700979,
+          "support": 2437
+        },
+        "macro avg": {
+          "precision": 0.9523774417076916,
+          "recall": 0.8928418775851279,
+          "f1-score": 0.9190390769904089,
+          "support": 2437
+        },
+        "weighted avg": {
+          "precision": 0.9475669802588897,
+          "recall": 0.8818219121871153,
+          "f1-score": 0.9111384530963106,
+          "support": 2437
+        }
+      }
+    },
+    "BERT": {
+      "strict_entity_f1": 0.7542441390460791,
+      "report": {
+        "DATE": {
+          "precision": 0.9965635738831615,
+          "recall": 1.0,
+          "f1-score": 0.9982788296041308,
+          "support": 290
+        },
+        "EVIDENCE": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 205
+        },
+        "LOCATION": {
+          "precision": 0.8386075949367089,
+          "recall": 0.5760869565217391,
+          "f1-score": 0.6829896907216495,
+          "support": 460
+        },
+        "PROPERTY": {
+          "precision": 0.7871485943775101,
+          "recall": 0.9849246231155779,
+          "f1-score": 0.875,
+          "support": 199
+        },
+        "SUSPECT": {
+          "precision": 0.5383211678832117,
+          "recall": 0.7160194174757282,
+          "f1-score": 0.6145833333333333,
+          "support": 412
+        },
+        "TIME": {
+          "precision": 0.9570957095709571,
+          "recall": 1.0,
+          "f1-score": 0.9780775716694773,
+          "support": 290
+        },
+        "VICTIM": {
+          "precision": 0.424507658643326,
+          "recall": 0.43400447427293065,
+          "f1-score": 0.4292035398230089,
+          "support": 447
+        },
+        "WEAPON": {
+          "precision": 0.9225352112676056,
+          "recall": 0.9776119402985075,
+          "f1-score": 0.9492753623188407,
+          "support": 134
+        },
+        "micro avg": {
+          "precision": 0.7431302270011948,
+          "recall": 0.7656955272876488,
+          "f1-score": 0.7542441390460791,
+          "support": 2437
+        },
+        "macro avg": {
+          "precision": 0.8080974388203102,
+          "recall": 0.8360809264605604,
+          "f1-score": 0.8159260409338049,
+          "support": 2437
+        },
+        "weighted avg": {
+          "precision": 0.7587715301785041,
+          "recall": 0.7656955272876488,
+          "f1-score": 0.7544968519845089,
+          "support": 2437
+        }
+      }
+    }
+  },
+  "validation": {
+    "CRF": 0.9347962382445142,
+    "BERT": 0.8087661362954068
+  },
+  "bert_history": [
+    {
+      "epoch": 1,
+      "loss": 0.3428403755856885,
+      "validation_entity_f1": 0.7425915165601394
+    },
+    {
+      "epoch": 2,
+      "loss": 0.03273616797854135,
+      "validation_entity_f1": 0.7949097366084641
+    },
+    {
+      "epoch": 3,
+      "loss": 0.013861005266346498,
+      "validation_entity_f1": 0.7979797979797979
+    },
+    {
+      "epoch": 4,
+      "loss": 0.008993439599842891,
+      "validation_entity_f1": 0.8087661362954068
+    },
+    {
+      "epoch": 5,
+      "loss": 0.006997894168038059,
+      "validation_entity_f1": 0.8020064915904396
+    }
+  ],
+  "split": "V3 held-out event patterns and name/place pools; models fixed before scoring"
+}

@@ -66,11 +66,17 @@ def load_data(stamp):
 
 @st.cache_resource
 def search_resources(stamp):
-    return joblib.load(MODELS / "tfidf.joblib").named_steps["vectorizer"], sparse.load_npz(ARTIFACTS / "search_matrix.npz")
+    from crime_nlp.features import keyword_vectorizer
+    return keyword_vectorizer(joblib.load(MODELS / "tfidf.joblib")), sparse.load_npz(ARTIFACTS / "search_matrix.npz")
+
+
+def cached_analysis(text, use_bert=False, ner_choice="Automatic"):
+    from crime_nlp.inference import model_revision
+    return _cached_analysis(text, use_bert, ner_choice, model_revision())
 
 
 @st.cache_data(max_entries=64, show_spinner=False)
-def cached_analysis(text, use_bert=False, ner_choice="Automatic"):
+def _cached_analysis(text, use_bert, ner_choice, revision):
     from crime_nlp.inference import analyze
     return analyze(text, use_bert=use_bert, ner_choice=ner_choice)
 
@@ -104,7 +110,7 @@ st.sidebar.caption("Spark · BERT · CRF · spaCy")
 dashboard_path = PROCESSED / "dashboard.parquet"
 if not dashboard_path.exists() or not (ARTIFACTS / "version2_ready.json").exists():
     heading("Project setup", "Your research workspace", "Decoding Crime Narratives using NLP and Big Data Analytics")
-    st.info("Version 2 is ready after its data, model and search-index stages finish. Run the commands below to build it.")
+    st.info("The dashboard is ready after its data, model and search-index stages finish. Run the commands below to build it.")
     st.code("python scripts/download_resources.py\npython run_pipeline.py\npython -m streamlit run app.py", language="bash")
     st.stop()
 
@@ -135,13 +141,13 @@ def show_analysis(result, key):
     from crime_nlp.inference import highlight_entities, language_model
     from spacy import displacy
     top = st.columns(4)
-    top[0].metric("TF-IDF prediction", result["crime_type"])
+    top[0].metric("Suggested category" if result["review_required"] else "TF-IDF prediction", result["crime_type"])
     top[1].metric("VADER polarity", f"{result['sentiment']['compound']:+.2f}")
     top[2].metric("Threat-language cues", result["threat"]["level"])
     top[3].metric("Extracted entities", len(result["entities"]))
-    st.caption(f"Calibrated category score: {result['model_score']:.1%}. Entity model: {result['ner_model']}. Scores are model estimates, not proof.")
+    st.caption(f"Calibrated category score: {result['model_score']:.1%}. Entity model: {result['ner_model']}. Release {result.get('model_version', 'earlier')}. Scores are model estimates, not proof.")
     if result["review_required"]:
-        st.warning("Low classification confidence: review the narrative before accepting its suggested category.")
+        st.warning("Needs review: " + " ".join(result.get("review_reasons", ["Limited classification confidence."])))
     if "bert_prediction" in result:
         st.info(f"BERT sequence classification: {result['bert_prediction']}")
     tabs = st.tabs(["Entities & summary", "Syntax & morphology", "Evidence search", "Analysis details"])
@@ -149,8 +155,10 @@ def show_analysis(result, key):
         st.markdown("#### Annotated narrative")
         st.caption("Colored mentions include participants, places, weapons, property, dates, times and evidence. Role labels may describe allegations.")
         st.markdown(highlight_entities(result["text"], result["entities"]), unsafe_allow_html=True)
+        with st.expander("Original text, exactly as entered"):
+            st.code(result["text"], language=None, wrap_lines=True)
         st.markdown("#### Case summary")
-        st.write(result["summary"])
+        st.markdown(highlight_entities(result["summary"], []), unsafe_allow_html=True)
         st.caption("Extractive TextRank: source sentences ranked by similarity, with a small lead-sentence prior.")
         if result["entities"]:
             st.dataframe(pd.DataFrame(result["entities"])[["text", "label", "assertion", "confidence", "start", "end"]], hide_index=True, width="stretch")
@@ -216,13 +224,13 @@ if page == "Overview":
         chart(px.bar(counts.sort_values("Reports"), x="Reports", y="Category", orientation="h", color="Reports", color_continuous_scale=["#b3dcd3", "#087f75"]).update_layout(coloraxis_showscale=False), 360)
     left, right = st.columns([1.7, 1])
     with left:
-        st.markdown("#### Categories across fictional districts")
+        st.markdown("#### Categories across example locations")
         heat = pd.crosstab(selected.district, selected.crime_type)
         chart(px.imshow(heat, color_continuous_scale="Teal", aspect="auto", labels=dict(x="", y="", color="Reports")), 320)
     with right:
         st.markdown("#### Language polarity")
         chart(px.histogram(selected, x="sentiment", nbins=25, labels={"sentiment": "VADER compound score"}, color_discrete_sequence=["#3e6da8"]), 320)
-    st.markdown('<div class="note"><b>Reading these charts:</b> the corpus is generated, so the trends reflect the generator rather than real crime rates. All people, places and events are fictional.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="note"><b>Reading these charts:</b> all events and roles are fictional. Place names include real cities for language coverage; these charts do not describe real crime rates.</div>', unsafe_allow_html=True)
 
 elif page == "Case explorer":
     heading("Research workspace / case explorer", "Explore the case library", "Search, filter and inspect the evidence in individual narratives.")
@@ -271,7 +279,12 @@ elif page == "Case explorer":
 
 elif page == "Narrative lab":
     heading("Research workspace / narrative lab", "Read between the lines", "Analyze your own text with the trained NLP pipeline.")
-    st.caption("Models are trained on fictional English narratives. Results on other writing styles may be unreliable. Uploaded text is analyzed in memory and is not saved by the app.")
+    st.caption("Write in your own words, including short sentences, informal English or spelling mistakes. Names and places can be from anywhere. Your original text is preserved and is not saved by the app.")
+    with st.expander("Try an informal example"):
+        st.code("sir ystrday two fellows showed knife and took my moblie near bus stand")
+        st.code("José García hit Wei Zhang with iron rod near Nairobi")
+        st.code("paid advance for phone seller disapeared no delivery and blocked my number")
+        st.caption("The models learn from fictional examples. Unclear descriptions may need more detail; a predicted role is an allegation, not a finding.")
     upload = st.file_uploader("Optional: open a text case file", type=["txt"])
     default = fetch_reports([data.index[0]]).iloc[0].narrative
     if upload:
@@ -296,9 +309,19 @@ elif page == "Narrative lab":
             with st.spinner("Extracting entities, syntax, topics and context..."):
                 # Avoid caching user submissions across browser sessions.
                 from crime_nlp.inference import analyze
-                st.session_state["lab_result"] = analyze(text, use_bert, ner_choice)
-    if "lab_result" in st.session_state:
-        show_analysis(st.session_state["lab_result"], "lab")
+                try:
+                    st.session_state["lab_result"] = analyze(text, use_bert, ner_choice)
+                except ValueError as exc:
+                    st.session_state.pop("lab_result", None)
+                    st.warning(str(exc))
+    if "lab_result" in st.session_state and st.session_state["lab_result"]["text"] == text:
+        from crime_nlp.inference import model_revision_id
+        if st.session_state["lab_result"].get("model_revision") == model_revision_id():
+            show_analysis(st.session_state["lab_result"], "lab")
+        else:
+            st.info("The models have been updated. Select Analyze narrative to use the latest version.")
+    elif "lab_result" in st.session_state:
+        st.info("The text has changed. Select Analyze narrative to update the results.")
 
 elif page == "Model evaluation":
     heading("Research workspace / model evaluation", "Measure what the models learn", "Real metrics from a fixed test set of previously unseen scenario templates.")
@@ -333,8 +356,20 @@ elif page == "Model evaluation":
     st.dataframe(pd.DataFrame([{"Model": name, "Validation F1": ner_evaluation["validation"][name], "Final-test F1": item["strict_entity_f1"]} for name, item in ner_evaluation["models"].items()]), hide_index=True)
     entity_rows = {k: v for k, v in ner_evaluation["report"].items() if k in ner_evaluation["labels"]}
     st.dataframe(pd.DataFrame(entity_rows).T.round(3), width="stretch")
-    st.caption(f"CRF evaluated on {ner_evaluation['test_rows']} held-out narratives. An entity must have both the correct span and label to count as correct.")
-    st.caption("Version 2 selects the entity model using validation scores and freezes model hashes before final evaluation. Shared synthetic grammar still limits generalization.")
+    st.caption(f"{ner_evaluation['model']} evaluated on {ner_evaluation['test_rows']} narratives. Both the span and label must be correct. " + ner_evaluation.get("split", ""))
+    st.caption("The entity model is selected on validation. Shared synthetic grammar and previously viewed evaluation subsets limit generalization claims.")
+    if (ARTIFACTS / "robustness_development.json").exists():
+        with st.expander("Informal English and unfamiliar names: development checks", expanded=True):
+            challenges = read_artifact("robustness_development.json")
+            rows = [{"Release": version.upper(), "Category cases correct (of 32)": sum(case["correct"] for case in item["cases"]),
+                     "Exact CRF people + location cases (of 8)": item["exact_role_cases"]}
+                    for version, item in challenges.items() if version in {"v2", "v3", "v3.1"}]
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+            st.caption("The same hand-written examples were used for this comparison. They informed development and are not an independent final benchmark. The held-out synthetic results are shown above.")
+            failures = [case for case in challenges.get("v3.1", challenges.get("v3", {})).get("cases", []) if not case["correct"]]
+            if failures:
+                st.write("Cases still requiring improvement")
+                st.dataframe(pd.DataFrame(failures)[["text", "expected", "prediction"]], hide_index=True, width="stretch")
     with st.expander("Confidence, uncertainty and evaluation protocol"):
         st.markdown("Precision asks how many predictions were right. Recall asks how many true items were found. F1 balances both. Macro F1 gives each category equal weight. A confidence interval describes sampling uncertainty on this corpus, not reliability on a new source.")
         st.json(read_artifact("evaluation_plan.json"))

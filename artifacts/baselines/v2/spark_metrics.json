@@ -1,0 +1,21 @@
+{
+  "engine": "Apache Spark",
+  "spark_version": "3.5.5",
+  "master": "spark://127.0.0.1:17077",
+  "input_partitions": 8,
+  "shuffle_partitions": 8,
+  "raw_rows": 62700,
+  "invalid_rows_removed": 1200,
+  "duplicates_removed": 1500,
+  "clean_rows": 60000,
+  "storage": "Spark-written Parquet partitioned by split",
+  "runtime_seconds": 32.24,
+  "mllib": {
+    "model": "HashingTF + IDF + multinomial logistic regression",
+    "train_rows": 37512,
+    "test_rows": 7496,
+    "accuracy": 0.8748665955176094,
+    "weighted_f1": 0.8335249333196719
+  },
+  "deployment_note": "Standalone Spark master and worker processes; see cluster_execution.json for verified workers and host scope."
+}

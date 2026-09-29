@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from crime_nlp.config import ROOT, ARTIFACTS, write_json
+from crime_nlp.config import ROOT, ARTIFACTS, SETTINGS, write_json
 
 
 def read(name):
@@ -26,7 +26,7 @@ def main():
              "| Model | Accuracy | Macro F1 | Weighted F1 |", "|---|---:|---:|---:|"]
     for name, result in evaluation["models"].items():
         lines.append(f"| {name} | {result['accuracy']:.4f} | {result['macro_f1']:.4f} | {result['weighted_f1']:.4f} |")
-    lines += ["", "## Entity extraction", "", f"Validation-selected {ner['model']} strict entity F1: **{ner['strict_entity_f1']:.4f}** on {ner['test_rows']} final-test narratives.", "",
+    lines += ["", "## Entity extraction", "", f"Validation-selected {ner['model']} strict entity F1: **{ner['strict_entity_f1']:.4f}** on {ner['test_rows']} evaluation narratives.", "", ner.get("split", ""), "",
               "| Entity | Precision | Recall | F1 |", "|---|---:|---:|---:|"]
     for label in ner["labels"]:
         result = ner["report"][label]
@@ -70,7 +70,17 @@ def main():
               "## Both entity models", "", "| Model | Validation strict F1 | Final-test strict F1 |", "|---|---:|---:|"]
     for name, result in ner["models"].items():
         lines.append(f"| {name} | {ner['validation'][name]:.4f} | {result['strict_entity_f1']:.4f} |")
-    lines += ["", "## Interpretation", "", "The corpus is synthetic. Scenario groups are separated, but vocabulary and generator conventions are shared. V2 model hashes were frozen before final predictions. No human-reference accuracy is claimed for syntax, sentiment, threat heuristics, search or summarization. Spark ran with a standalone master and two workers on one physical host; Docker and multi-host deployment were not exercised. V1 and V2 scores use different corpora and protocols.", "",
+    robustness = ARTIFACTS / "robustness_development.json"
+    if robustness.exists():
+        comparisons = read("robustness_development.json")
+        lines += ["", "## Informal English development challenges", "", comparisons["scope"], "",
+                  "| Release | Category cases correct / 32 | Exact people + location cases / 8 |", "|---|---:|---:|"]
+        for version in ("v2", "v3", "v3.1"):
+            if version in comparisons:
+                result = comparisons[version]
+                lines.append(f"| {version} | {sum(row['correct'] for row in result['cases'])} | {result['exact_role_cases']} |")
+        lines += ["", "These hand-written examples informed development. They are not an untouched final benchmark or evidence of flawless real-world performance. Every case is retained in artifacts/robustness_development.json."]
+    lines += ["", "## Interpretation", "", "The corpus is synthetic. Scenario groups are separated, but vocabulary and generator conventions are shared. V3 model hashes were frozen before final predictions. No human-reference accuracy is claimed for syntax, sentiment, threat heuristics, search or summarization. " + spark["deployment_note"] + " Docker and multi-host deployment were not exercised. Version benchmarks use different corpora and protocols.", "",
               "Resources: `artifacts/evaluation.json`, `ner_evaluation.json`, `spark_metrics.json`, `topics.json`, split ID CSVs, and `logs/`."]
     markdown = "\n".join(lines) + "\n"
     (ROOT / "docs" / "RESULTS.md").write_text(markdown, encoding="utf-8")
@@ -79,7 +89,7 @@ def main():
     body = parser.render(source) + '<div class="new-page"></div>' + parser.render(markdown)
     style = "body{font:14px/1.65 Arial,sans-serif;color:#203245;max-width:900px;margin:45px auto;padding:0 30px}h1{font-size:30px;color:#0c655f;line-height:1.3}h2{font-size:20px;margin-top:30px}table{border-collapse:collapse;width:100%;font-size:12px}td,th{border:1px solid #d7e1e6;padding:8px;text-align:left}th{background:#edf4f3}code{font-size:12px;background:#f0f3f5;padding:2px 4px}a{color:#126b78}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f3f5;padding:12px}td,code{overflow-wrap:anywhere}p,li{orphans:3;widows:3}h1,h2,h3{break-after:avoid}@media print{body{margin:0;max-width:none;font-size:11px}.new-page{break-before:page}h1{font-size:25px}h2{font-size:17px}a{color:inherit}table{break-inside:avoid}}"
     (ROOT / "docs" / "PROJECT_REPORT.html").write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Decoding Crime Narratives — Project Report</title><style>' + style + '</style></head><body>' + body + '</body></html>', encoding="utf-8")
-    write_json(ARTIFACTS / "delivery_manifest.json", {"generated_at": datetime.now(timezone.utc).isoformat(), "version": "2.0.0", "project": "Decoding Crime Narratives using NLP and Big Data Analytics", "reports": spark["clean_rows"], "spark_master": spark["master"], "models": list(evaluation["models"]), "final_models_frozen": True, "docker_executed": False})
+    write_json(ARTIFACTS / "delivery_manifest.json", {"generated_at": datetime.now(timezone.utc).isoformat(), "version": SETTINGS["project"]["version"], "project": "Decoding Crime Narratives using NLP and Big Data Analytics", "reports": spark["clean_rows"], "spark_master": spark["master"], "models": list(evaluation["models"]), "final_models_frozen": True, "docker_executed": False})
     print("Created docs/RESULTS.md and docs/PROJECT_REPORT.html from executed artifacts.")
 
 

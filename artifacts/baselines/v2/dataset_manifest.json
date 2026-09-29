@@ -1,0 +1,26 @@
+{
+  "source": "synthetic-v2",
+  "seed": 42,
+  "valid_unique_reports": 60000,
+  "raw_rows": 62700,
+  "injected_errors": {
+    "duplicates": 1500,
+    "null_text": 600,
+    "blank_text": 300,
+    "invalid_date": 300
+  },
+  "category_counts": {
+    "Burglary": 7500,
+    "Robbery": 7500,
+    "Theft": 7500,
+    "Assault": 7500,
+    "Fraud": 7500,
+    "Cybercrime": 7500,
+    "Vandalism": 7500,
+    "Arson": 7500
+  },
+  "scenario_groups": 384,
+  "diversity": "64 incident phrasings x 6 layouts = 384 composite groups; independently varied participant phrasing, unseen first names, unidentified/multiple suspects and multiple victims.",
+  "split_policy": "Per crime: incident variants 0-4 train, 5 validation, 6 development, 7 final test. Participant phrasing and first-name pools are also split. Layout grammar and vocabulary remain shared.",
+  "limitations": "Fictional template-generated data; metrics do not establish performance on real crime narratives."
+}

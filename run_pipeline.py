@@ -19,7 +19,10 @@ def main():
     parser.add_argument("--validation-limit", type=int, default=800)
     parser.add_argument("--bert-epochs", type=int, default=SETTINGS["training"]["bert_epochs"])
     parser.add_argument("--resume", action="store_true", help="Skip stages only when recorded input and output hashes still match")
+    parser.add_argument("--entities-only", action="store_true", help="Enrich stage only: refresh NER after an entity-only model update; retain unchanged corpus/search/classifier outputs")
     args = parser.parse_args()
+    if args.entities_only and args.stage != "enrich":
+        parser.error("--entities-only requires --stage enrich")
     if args.records < 50000 and args.stage in {"all", "generate"}:
         parser.error("The full university project requires at least 50,000 valid reports.")
     if min(args.train_limit, args.test_limit, args.validation_limit) < 8 or args.bert_epochs < 1:
@@ -33,7 +36,9 @@ def main():
         from crime_nlp.train import train_models
         train_models(args.train_limit, args.test_limit, args.validation_limit, args.bert_epochs)
     def enrich():
-        from crime_nlp.enrich import enrich as process
+        from crime_nlp.enrich import enrich as process, refresh_entity_predictions
+        if args.entities_only:
+            return refresh_entity_predictions()
         process()
     stages.update(spark=spark, train=train, enrich=enrich)
     selected = list(stages) if args.stage == "all" else [args.stage]

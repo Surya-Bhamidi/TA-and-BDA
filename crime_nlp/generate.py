@@ -177,12 +177,24 @@ def generate(count=60000, seed=SEED, path=RAW):
     if count < 64:
         raise ValueError("At least 64 reports are needed to cover all scenario groups.")
     rng = random.Random(seed)
-    samples, counts = [], Counter()
+    from .robust_corpus import make_informal_report
+    samples, counts, seen, groups = [], Counter(), set(), set()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as out:
         for i in range(count):
-            row = make_report(i, rng)
+            # Preserve formal reports, but make informal input the majority.
+            # Reject normalized duplicates across ALL splits before writing.
+            for attempt in range(1000):
+                row = (make_report(i // 5, rng) if i % 5 == 0
+                       else make_informal_report(i - i // 5 - 1, rng))
+                normalized = " ".join(re.sub(r"[^\w\s]", " ", row["narrative"].lower()).split())
+                if normalized not in seen:
+                    seen.add(normalized)
+                    break
+            else:
+                raise RuntimeError(f"Unable to generate a unique report at row {i}")
             counts[row["crime_type"]] += 1
+            groups.add(row["template_group"])
             if i < 1500:
                 samples.append(row)
             out.write(json.dumps(row) + "\n")
@@ -199,11 +211,11 @@ def generate(count=60000, seed=SEED, path=RAW):
                 elif kind == "invalid_date":
                     row["reported_at"] = "invalid-date"
                 out.write(json.dumps(row) + "\n")
-    manifest = {"source": "synthetic-v2", "seed": seed, "valid_unique_reports": count,
+    manifest = {"source": "synthetic-v3-formal-and-informal", "seed": seed, "valid_unique_reports": count,
                 "raw_rows": count + sum(dirty_counts.values()), "injected_errors": dirty_counts,
-                "category_counts": dict(counts), "scenario_groups": 384,
-                "diversity": "64 incident phrasings x 6 layouts = 384 composite groups; independently varied participant phrasing, unseen first names, unidentified/multiple suspects and multiple victims.",
-                "split_policy": "Per crime: incident variants 0-4 train, 5 validation, 6 development, 7 final test. Participant phrasing and first-name pools are also split. Layout grammar and vocabulary remain shared.",
+                "category_counts": dict(counts), "scenario_groups": len(groups),
+                "diversity": "20% formal, 80% informal; fragmented English, word-order variants, real typo edits, casing/whitespace variation, international and invented names and places. Exact original spans retained.",
+                "split_policy": "Formal variants 0-4 train/5 validation/6 development/7 test. Informal variants 0-11 train/12-13 validation/14-15 development/16-17 test. Informal full-name and place pools disjoint; all styles of an event stay in its split. Normalized duplicates rejected globally.",
                 "limitations": "Fictional template-generated data; metrics do not establish performance on real crime narratives."}
     write_json(ARTIFACTS / "dataset_manifest.json", manifest)
     print(f"Generated {manifest['raw_rows']:,} rows ({count:,} unique valid reports).", flush=True)

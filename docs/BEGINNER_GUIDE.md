@@ -2,6 +2,8 @@
 
 It reads fictional crime descriptions and turns them into categories, highlighted mentions, summaries and searchable patterns. The complete explanation is in **docs/PROJECT_REPORT.pdf**, generated from **docs/REPORT.md** and **docs/RESULTS.md**.
 
+Version 3.1 accepts informal English, short fragments and spelling mistakes using the same model families. In Narrative lab, try `Mayank stole the phone of Surya while he was sleeping on 29-06-2026`. Names do not have to come from the sample data. The source text stays unchanged; uncertain categories show a review message. See **docs/ENTITY_CONTEXT_V3_1.md** and **docs/ROBUSTNESS_V3.md** for measured examples and limits.
+
 ## Follow one example
 
 “Alex reported a stolen phone near Cedar Market. No knife was reported.”

@@ -17,7 +17,7 @@ def main():
         assert "Executed project results" in page.inner_text("body")
         page.pdf(path=str(ROOT / "docs" / "PROJECT_REPORT.pdf"), format="A4", print_background=True,
                  display_header_footer=True, header_template="<div></div>",
-                 footer_template='<div style="font-size:8px;width:100%;text-align:center;color:#667">Decoding Crime Narratives · Version 2 · <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+                 footer_template='<div style="font-size:8px;width:100%;text-align:center;color:#667">Decoding Crime Narratives · Version 3 · <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
                  margin={"top": "16mm", "bottom": "19mm", "left": "16mm", "right": "16mm"})
         page.screenshot(path=str(ROOT / "docs" / "screenshots" / "report-preview.png"))
         browser.close()

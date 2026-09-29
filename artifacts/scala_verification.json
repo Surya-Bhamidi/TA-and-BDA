@@ -1,4 +1,7 @@
 {
   "exit_code": 0,
-  "records_verified": true
+  "records_verified": true,
+  "rows": 60000,
+  "expected_rows": 60000,
+  "temporary_jar_cleanup_warning": true
 }
